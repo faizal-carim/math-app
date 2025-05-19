@@ -1,0 +1,59 @@
+.game-screen {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #f9f8ff;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-family: "Comic Sans MS", cursive, sans-serif;
+  }
+  
+  .game-screen h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .game-screen p {
+    font-size: 20px;
+    color: #555;
+  }
+  
+  .game-screen input[type="number"] {
+    width: 80%;
+    padding: 10px;
+    font-size: 18px;
+    margin-top: 10px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  
+  .game-screen input[type="number"]:focus {
+    border-color: #7c4dff;
+  }
+  
+  .game-screen button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #7c4dff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .game-screen button:hover {
+    background-color: #5e35b1;
+  }
+  
+  .game-screen .feedback {
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 18px;
+  }
+  

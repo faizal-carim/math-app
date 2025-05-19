@@ -1,1 +1,3 @@
-console.log("React router")
+<Routes>
+  <Route path="/" element={<Home />} />
+</Routes>
