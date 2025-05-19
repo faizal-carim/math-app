@@ -48,10 +48,10 @@ export default function AuthScreen({ onAuthSuccess }) {
         : formData;
 
       const res = await axios.post(url, payload);
-      const { token, userId } = res.data;
-
+      const { token, userId } = res.data; 
       localStorage.setItem('token', token);
       localStorage.setItem('userId', userId);
+      
       onAuthSuccess();
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong');
