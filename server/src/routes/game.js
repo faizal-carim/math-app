@@ -4,38 +4,61 @@ const authenticate = require("../middleware/auth");
 
 router.post("/submit", authenticate, async (req, res) => {
   try {
-    const { correct, timeTaken } = req.body;
+    const { question, userAnswer, timeTaken } = req.body;
     const user = req.user;
 
-    // Update stats
-    user.gameStats.totalQuestions += 1;
-    if (correct) {
-      user.gameStats.totalCorrect += 1;
+    if (!question || userAnswer === undefined || timeTaken === undefined) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    // Parse the question string like "19 × 39" or "6 x 7"
+    // Normalize multiplication signs to '*', spaces trimmed
+    const normalizedQuestion = question.replace(/×|x/g, '*').trim();
+
+    // Evaluate the expression safely
+    let correctAnswer;
+    try {
+      // Very simple eval replacement, safe because input is strictly math expressions from your server
+      // You could enhance this if needed
+      correctAnswer = Function(`return (${normalizedQuestion})`)();
+    } catch (e) {
+      return res.status(400).json({ message: "Invalid question format" });
+    }
+
+    const isCorrect = Number(userAnswer) === correctAnswer;
+
+    // Update user stats
+    user.gameStats.totalQuestions = (user.gameStats.totalQuestions || 0) + 1;
+
+    if (isCorrect) {
+      user.gameStats.totalCorrect = (user.gameStats.totalCorrect || 0) + 1;
 
       // Reward currency for every 30 correct answers
       if (user.gameStats.totalCorrect % 30 === 0) {
-        user.currency += 1;
+        user.currency = (user.currency || 0) + 1;
       }
     }
 
-    // Update average time (basic rolling average)
+    // Update average time (rolling average)
     const q = user.gameStats.totalQuestions;
-    user.gameStats.averageTime = ((user.gameStats.averageTime * (q - 1)) + timeTaken) / q;
+    user.gameStats.averageTime = ((user.gameStats.averageTime || 0) * (q - 1) + timeTaken) / q;
 
     await user.save();
 
     res.json({
       message: "Answer submitted",
-      correct: correct,
+      isCorrect,
       totalCorrect: user.gameStats.totalCorrect,
       totalQuestions: user.gameStats.totalQuestions,
       averageTime: user.gameStats.averageTime,
       currency: user.currency
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Error submitting answer", error: error.message });
   }
 });
+
 
 router.get("/question", authenticate, async (req, res) => {
     const user = req.user;

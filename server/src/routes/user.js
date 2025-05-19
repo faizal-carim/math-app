@@ -6,11 +6,12 @@ router.get("/profile", authenticate, async (req, res) => {
   try {
     const user = req.user;
     res.json({
-      name: user.name,
+      name: user.username,
       email: user.email,
       grade: user.grade,
       schoolId: user.schoolId,
       currency: user.currency,
+      gameStats: user.gameStats,
       avatar: user.avatar || {},
     });
   } catch (error) {
