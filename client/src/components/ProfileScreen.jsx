@@ -4,28 +4,76 @@ import './ProfileScreen.css';
 
 export default function ProfileScreen({ onBack }) {
   const [profile, setProfile] = useState(null);
+  const [globalLeaderboard, setGlobalLeaderboard] = useState([]);
+  const [schoolLeaderboard, setSchoolLeaderboard] = useState([]);
   const [error, setError] = useState(null);
 
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    async function fetchProfile() {
+    async function fetchData() {
       try {
+        // Fetch profile
         const res = await axios.get("/api/user/profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setProfile(res.data);
+
+        // Fetch global leaderboard
+        const globalRes = await axios.get("/api/leaderboard/global", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setGlobalLeaderboard(globalRes.data);
+
+        // Fetch school leaderboard
+        const schoolRes = await axios.get(`/api/leaderboard/school?schoolId=${res.data.schoolId}&grade=${res.data.grade}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setSchoolLeaderboard(schoolRes.data);
+
       } catch (err) {
-        setError("Failed to load profile");
+        console.error(err);
+        setError("Failed to load profile or leaderboard.");
       }
     }
-    fetchProfile();
+
+    fetchData();
   }, [token]);
 
   if (error) return <div>{error}</div>;
   if (!profile) return <div>Loading profile...</div>;
 
-  const { name, grade, currency, gameStats, avatar } = profile;
+  const { _id: userId, name, grade, currency, gameStats, avatar } = profile;
+
+  // Helper to render leaderboard table
+  const renderLeaderboard = (data, title) => (
+    <div className="leaderboard-section">
+      <h3>{title}</h3>
+      <table className="leaderboard-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>User</th>
+            <th>Correct</th>
+            <th>Accuracy</th>
+            <th>Avg Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((entry, index) => (
+            <tr key={entry.username}
+              className={entry.username === name ? "highlight-row" : ""}>
+              <td>{index + 1}</td>
+              <td>{entry.username}</td>
+              <td>{entry.totalCorrect}</td>
+              <td>{entry.accuracy}%</td>
+              <td>{entry.averageTime}s</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 
   return (
     <div className="profile-container">
@@ -46,11 +94,14 @@ export default function ProfileScreen({ onBack }) {
 
         <div className="avatar-section">
           <h3>Avatar</h3>
-          <p>Hat: {avatar.equipped.hat || "None"}</p>
-          <p>Glasses: {avatar.equipped.glasses || "None"}</p>
-          <p>Shirt: {avatar.equipped.shirt || "None"}</p>
+          <p>Hat: {avatar?.equipped?.hat || "None"}</p>
+          <p>Glasses: {avatar?.equipped?.glasses || "None"}</p>
+          <p>Shirt: {avatar?.equipped?.shirt || "None"}</p>
         </div>
       </div>
+
+      {renderLeaderboard(globalLeaderboard, "🌍 Global Leaderboard")}
+      {renderLeaderboard(schoolLeaderboard, "🏫 School Leaderboard")}
     </div>
   );
 }
