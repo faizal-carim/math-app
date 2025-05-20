@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './GameScreen.css';
 
-
 export default function GameScreen({ onStop }) {
   const [questionData, setQuestionData] = useState(null);
   const [userAnswer, setUserAnswer] = useState('');
@@ -58,6 +57,16 @@ export default function GameScreen({ onStop }) {
     }
   };
 
+  const handleKeypadInput = (value) => {
+    if (value === 'del') {
+      setUserAnswer((prev) => prev.slice(0, -1));
+    } else if (value === 'enter') {
+      checkAnswer();
+    } else {
+      setUserAnswer((prev) => prev + value);
+    }
+  };
+
   useEffect(() => {
     fetchQuestion();
   }, []);
@@ -69,14 +78,24 @@ export default function GameScreen({ onStop }) {
         <div>
           <p className="question-text">What is {questionData.question}?</p>
           <input
-            type="number"
+            type="text"
             value={userAnswer}
-            onChange={(e) => setUserAnswer(e.target.value)}
+            readOnly
             placeholder="Your answer"
             className="answer-input"
           />
+          <div className="keypad">
+            {['1','2','3','4','5','6','7','8','9','0','del','enter'].map((key) => (
+              <button
+                key={key}
+                className={`keypad-button ${key === 'enter' ? 'enter' : ''} ${key === 'del' ? 'del' : ''}`}
+                onClick={() => handleKeypadInput(key)}
+              >
+                {key === 'del' ? '⌫' : key === 'enter' ? '⏎' : key}
+              </button>
+            ))}
+          </div>
           <div className="button-group">
-            <button className="game-button" onClick={checkAnswer}>Submit</button>
             <button className="game-button" onClick={onStop}>Stop</button>
           </div>
           {message && <p className="message-text">{message}</p>}
