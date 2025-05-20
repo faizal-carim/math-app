@@ -55,4 +55,25 @@
     font-size: 1.25rem;
     color: #333;
   }
+  .leaderboard-section {
+    margin-top: 2rem;
+  }
+  
+  .leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .leaderboard-table th,
+  .leaderboard-table td {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    text-align: center;
+  }
+  
+  .highlight-row {
+    background-color: #ffeaa7;
+    font-weight: bold;
+  }
+  
   

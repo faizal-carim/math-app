@@ -1,67 +1,37 @@
 const express = require("express");
-const AnswerAttempt = require("../models/AnswerAttempt");
 const User = require("../models/User");
 const authenticate = require("../middleware/auth");
 
 const router = express.Router();
 
-// Helper to get leaderboard entries
-async function getLeaderboard(schoolId = null, grade = null) {
-  const matchQuery = { isCorrect: true };
-  if (schoolId) matchQuery.schoolId = schoolId;
-  if (grade) matchQuery.grade = grade;
+// Utility to format leaderboard entries
+function formatUserStats(user) {
+  const { username, grade, schoolId, gameStats } = user;
+  const { totalCorrect, totalQuestions, averageTime } = gameStats;
 
-  // Get users with their total correct answers and average time per question
-  const leaderboard = await AnswerAttempt.aggregate([
-    {
-      $match: matchQuery
-    },
-    {
-      $group: {
-        _id: "$userId",
-        correctAnswers: { $sum: 1 },
-        avgTime: { $avg: "$timeTaken" }
-      }
-    },
-    {
-      $lookup: {
-        from: "users",
-        localField: "_id",
-        foreignField: "_id",
-        as: "user"
-      }
-    },
-    {
-      $unwind: "$user"
-    },
-    {
-      $project: {
-        _id: 0,
-        userId: "$user._id",
-        name: "$user.name",
-        grade: "$user.grade",
-        schoolId: "$user.schoolId",
-        correctAnswers: 1,
-        avgTime: 1
-      }
-    },
-    {
-      $sort: {
-        correctAnswers: -1,
-        avgTime: 1
-      }
-    },
-    { $limit: 20 } // top 20
-  ]);
+  const accuracy = totalQuestions > 0 ? (totalCorrect / totalQuestions) * 100 : 0;
 
-  return leaderboard;
+  return {
+    username,
+    grade,
+    schoolId,
+    totalCorrect,
+    totalQuestions,
+    averageTime: Number(averageTime.toFixed(2)),
+    accuracy: Number(accuracy.toFixed(1))
+  };
 }
 
 // Global leaderboard
 router.get("/global", authenticate, async (req, res) => {
   try {
-    const leaderboard = await getLeaderboard();
-    res.json(leaderboard);
+    const users = await User.find()
+      .select("username grade schoolId gameStats")
+      .sort({ "gameStats.totalCorrect": -1, "gameStats.averageTime": 1 })
+      .limit(20);
+
+    const formatted = users.map(formatUserStats);
+    res.json(formatted);
   } catch (err) {
     res.status(500).json({ message: "Error fetching global leaderboard", error: err.message });
   }
@@ -76,8 +46,13 @@ router.get("/school", authenticate, async (req, res) => {
   }
 
   try {
-    const leaderboard = await getLeaderboard(schoolId, grade);
-    res.json(leaderboard);
+    const users = await User.find({ schoolId, grade })
+      .select("username grade schoolId gameStats")
+      .sort({ "gameStats.totalCorrect": -1, "gameStats.averageTime": 1 })
+      .limit(20);
+
+    const formatted = users.map(formatUserStats);
+    res.json(formatted);
   } catch (err) {
     res.status(500).json({ message: "Error fetching school leaderboard", error: err.message });
   }
