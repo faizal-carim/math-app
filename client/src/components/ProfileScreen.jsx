@@ -13,32 +13,36 @@ export default function ProfileScreen({ onBack }) {
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch profile
+        // Fetch profile first
         const res = await axios.get("/api/user/profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setProfile(res.data);
-
-        // Fetch global leaderboard
-        const globalRes = await axios.get("/api/leaderboard/global", {
+        const userProfile = res.data;
+        setProfile(userProfile);
+  
+        const { grade, schoolId } = userProfile;
+  
+        // Fetch global leaderboard filtered by grade
+        const globalRes = await axios.get(`/api/leaderboard/global?grade=${grade}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setGlobalLeaderboard(globalRes.data);
-
-        // Fetch school leaderboard
-        const schoolRes = await axios.get(`/api/leaderboard/school?schoolId=${res.data.schoolId}&grade=${res.data.grade}`, {
+  
+        // Fetch school leaderboard filtered by school and grade
+        const schoolRes = await axios.get(`/api/leaderboard/school?schoolId=${schoolId}&grade=${grade}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setSchoolLeaderboard(schoolRes.data);
-
+  
       } catch (err) {
         console.error(err);
         setError("Failed to load profile or leaderboard.");
       }
     }
-
+  
     fetchData();
   }, [token]);
+  
 
   if (error) return <div>{error}</div>;
   if (!profile) return <div>Loading profile...</div>;

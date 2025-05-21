@@ -24,8 +24,9 @@ function formatUserStats(user) {
 
 // Global leaderboard
 router.get("/global", authenticate, async (req, res) => {
+  const { grade } = req.query;
   try {
-    const users = await User.find()
+    const users = await User.find({ grade })
       .select("username grade schoolId gameStats")
       .sort({ "gameStats.totalCorrect": -1, "gameStats.averageTime": 1 })
       .limit(20);
