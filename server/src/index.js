@@ -9,7 +9,7 @@ const gameRoutes = require("./routes/game");
 const leaderboardRoutes = require("./routes/leaderboard");
 const storeRoutes = require("./routes/store");
 const userRoutes = require("./routes/user");
-
+const adminRoutes = require("./routes/admin");
 
 
 
@@ -32,6 +32,8 @@ app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/store", storeRoutes);
 
 app.use("/api/user", userRoutes);
+
+app.use("/api/admin", adminRoutes);
 
 app.listen(3001, () => {
   console.log("Server running on port 3001");

@@ -1,14 +1,18 @@
 :root {
-  --primary-color: #4CAF50;
-  --secondary-color: #2196F3;
-  --accent-color: #FF9800;
-  --danger-color: #F44336;
-  --background-color: #5D0024;
-  --card-color: #7A0030;
-  --text-color: #FFFFFF;
-  --text-secondary: #E0E0E0;
-  --border-radius: 12px;
-  --shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  --primary-color: #6200ea;
+  --secondary-color: #03a9f4;
+  --accent-color: #ff9100;
+  --danger-color: #f44336;
+  --success-color: #4caf50;
+  --background-color: #121212;
+  --surface-color: #1e1e1e;
+  --card-color: #2d2d2d;
+  --text-color: #ffffff;
+  --text-secondary: #b0b0b0;
+  --border-color: #424242;
+  --border-radius: 8px;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --input-bg: #333333;
 }
 
 * {
@@ -18,12 +22,13 @@
 }
 
 body {
-  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', sans-serif;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
   background-color: var(--background-color);
   color: var(--text-color);
   margin: 0;
   padding: 0;
   min-height: 100vh;
+  line-height: 1.6;
 }
 
 button {
@@ -32,6 +37,9 @@ button {
   border: none;
   border-radius: var(--border-radius);
   transition: all 0.2s ease;
+  font-weight: 500;
+  padding: 10px 16px;
+  color: var(--text-color);
 }
 
 button:hover {
@@ -43,27 +51,70 @@ button:active {
   transform: translateY(0);
 }
 
+input, select, textarea {
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  border-radius: var(--border-radius);
+  padding: 10px 12px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(98, 0, 234, 0.2);
+}
+
 .icon-button {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   padding: 10px 16px;
-  font-size: 16px;
-  font-weight: bold;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-color);
 }
 
 .icon-text {
   display: flex;
   align-items: center;
   gap: 6px;
+  color: var(--text-color);
 }
 
 .card {
   background-color: var(--card-color);
   border-radius: var(--border-radius);
-  padding: 16px;
+  padding: 20px;
   box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 500;
+  margin-bottom: 16px;
+  color: var(--text-color);
+}
+
+a {
+  color: var(--secondary-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+p, span, div {
+  color: var(--text-color);
+}
+
+label {
+  color: var(--text-color);
 }
 
 /* Mobile responsiveness */
@@ -77,14 +128,14 @@ button:active {
   }
   
   .card {
-    padding: 12px;
+    padding: 16px;
   }
 }
 
 /* Animations */
 @keyframes pop {
   0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  50% { transform: scale(1.05); }
   100% { transform: scale(1); }
 }
 

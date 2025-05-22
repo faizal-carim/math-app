@@ -8,6 +8,8 @@ export default function AdminScreen({ onBack, onLogout }) {
   const [selectedSchool, setSelectedSchool] = useState(null);
   const [message, setMessage] = useState('');
   const [grades, setGrades] = useState([{ name: 'Grade 1' }]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const token = localStorage.getItem('token');
 
@@ -16,29 +18,61 @@ export default function AdminScreen({ onBack, onLogout }) {
   }, []);
 
   const fetchSchools = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      const res = await axios.get('/api/admin/schools', {
-        headers: { Authorization: `Bearer ${token}` }
+      // Log the request for debugging
+      console.log('Fetching schools with token:', token);
+      
+      // Use the full URL for debugging
+      const res = await axios.get('http://localhost:3001/api/admin/schools', {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
+      
+      console.log('Schools response:', res.data);
       setSchools(res.data);
+      setLoading(false);
     } catch (err) {
+      console.error('Error fetching schools:', err.response || err);
+      setError(err.response?.data?.message || 'Failed to load schools');
       setMessage('Failed to load schools');
+      setLoading(false);
     }
   };
 
   const handleAddSchool = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
     try {
-      await axios.post('/api/admin/schools', 
+      // Log the request for debugging
+      console.log('Adding school:', { ...newSchool, grades });
+      
+      // Use the full URL for debugging
+      const res = await axios.post('http://localhost:3001/api/admin/schools', 
         { ...newSchool, grades },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          } 
+        }
       );
+      
+      console.log('Add school response:', res.data);
       setNewSchool({ name: '', licenseExpiry: '' });
       setGrades([{ name: 'Grade 1' }]);
       setMessage('School added successfully');
+      setLoading(false);
       fetchSchools();
     } catch (err) {
+      console.error('Error adding school:', err.response || err);
+      setError(err.response?.data?.message || 'Failed to add school');
       setMessage('Failed to add school');
+      setLoading(false);
     }
   };
 
@@ -46,16 +80,30 @@ export default function AdminScreen({ onBack, onLogout }) {
     e.preventDefault();
     if (!selectedSchool) return;
     
+    setLoading(true);
+    setError(null);
     try {
-      await axios.put(`/api/admin/schools/${selectedSchool._id}/renew`, 
+      // Use the full URL for debugging
+      const res = await axios.put(`http://localhost:3001/api/admin/schools/${selectedSchool._id}/renew`, 
         { licenseExpiry: selectedSchool.licenseExpiry },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          } 
+        }
       );
+      
+      console.log('Renew license response:', res.data);
       setMessage('License renewed successfully');
       setSelectedSchool(null);
+      setLoading(false);
       fetchSchools();
     } catch (err) {
+      console.error('Error renewing license:', err.response || err);
+      setError(err.response?.data?.message || 'Failed to renew license');
       setMessage('Failed to renew license');
+      setLoading(false);
     }
   };
 
@@ -89,6 +137,7 @@ export default function AdminScreen({ onBack, onLogout }) {
       </div>
 
       {message && <div className="admin-message">{message}</div>}
+      {error && <div className="admin-error">{error}</div>}
 
       <div className="admin-section">
         <h3>Add New School</h3>
@@ -129,42 +178,50 @@ export default function AdminScreen({ onBack, onLogout }) {
             <button type="button" className="add-grade-button" onClick={addGradeField}>Add Grade</button>
           </div>
           
-          <button type="submit" className="submit-button">Add School</button>
+          <button type="submit" className="submit-button" disabled={loading}>
+            {loading ? 'Adding...' : 'Add School'}
+          </button>
         </form>
       </div>
 
       <div className="admin-section">
         <h3>Manage Schools</h3>
-        <table className="schools-table">
-          <thead>
-            <tr>
-              <th>School Name</th>
-              <th>License Expiry</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {schools.map(school => (
-              <tr key={school._id} className={isExpired(school.licenseExpiry) ? 'expired-row' : ''}>
-                <td>{school.name}</td>
-                <td>{formatDate(school.licenseExpiry)}</td>
-                <td>{isExpired(school.licenseExpiry) ? 'Expired' : 'Active'}</td>
-                <td>
-                  <button 
-                    className="renew-button"
-                    onClick={() => setSelectedSchool({
-                      ...school,
-                      licenseExpiry: new Date(school.licenseExpiry).toISOString().split('T')[0]
-                    })}
-                  >
-                    Renew
-                  </button>
-                </td>
+        {loading ? (
+          <div className="loading">Loading schools...</div>
+        ) : schools.length > 0 ? (
+          <table className="schools-table">
+            <thead>
+              <tr>
+                <th>School Name</th>
+                <th>License Expiry</th>
+                <th>Status</th>
+                <th>Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {schools.map(school => (
+                <tr key={school._id} className={isExpired(school.licenseExpiry) ? 'expired-row' : ''}>
+                  <td>{school.name}</td>
+                  <td>{formatDate(school.licenseExpiry)}</td>
+                  <td>{isExpired(school.licenseExpiry) ? 'Expired' : 'Active'}</td>
+                  <td>
+                    <button 
+                      className="renew-button"
+                      onClick={() => setSelectedSchool({
+                        ...school,
+                        licenseExpiry: new Date(school.licenseExpiry).toISOString().split('T')[0]
+                      })}
+                    >
+                      Renew
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="no-schools">No schools found. Add a school to get started.</div>
+        )}
       </div>
 
       {selectedSchool && (
@@ -182,7 +239,9 @@ export default function AdminScreen({ onBack, onLogout }) {
                 />
               </div>
               <div className="modal-actions">
-                <button type="submit" className="renew-button">Renew License</button>
+                <button type="submit" className="renew-button" disabled={loading}>
+                  {loading ? 'Renewing...' : 'Renew License'}
+                </button>
                 <button type="button" className="cancel-button" onClick={() => setSelectedSchool(null)}>Cancel</button>
               </div>
             </form>
