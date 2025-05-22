@@ -107,6 +107,7 @@ router.get("/question", authenticate, async (req, res) => {
     const operation = operations[Math.floor(Math.random() * operations.length)];
   
     let min = 1, max = 10;
+    let num1, num2, answer, displayOp;
   
     // Customize difficulty based on grade
     if (grade.includes("Grade 1")) {
@@ -119,22 +120,47 @@ router.get("/question", authenticate, async (req, res) => {
       max = 100;
     }
   
-    const num1 = Math.floor(Math.random() * (max - min + 1)) + min;
-    const num2 = Math.floor(Math.random() * (max - min + 1)) + min;
-  
-    let answer;
-    let displayOp;
-  
+    // Generate numbers based on operation
     switch (operation) {
       case "+":
+        // Addition - just use the grade-based limits
+        num1 = Math.floor(Math.random() * (max - min + 1)) + min;
+        num2 = Math.floor(Math.random() * (max - min + 1)) + min;
         answer = num1 + num2;
         displayOp = "+";
         break;
+        
       case "-":
+        // Subtraction - ensure positive answer by making first number >= second number
+        num1 = Math.floor(Math.random() * (max - min + 1)) + min;
+        // Second number must be less than or equal to first number
+        num2 = Math.floor(Math.random() * num1) + min;
         answer = num1 - num2;
         displayOp = "-";
         break;
+        
       case "×":
+        // Multiplication - limit to max of 12, and if one number is 2 digits, the other is 1 digit
+        const multiMax = Math.min(12, max); // Cap at 12 for multiplication
+        
+        // First, decide if we're using a 2-digit number
+        const useTwoDigits = multiMax > 9 && Math.random() > 0.5;
+        
+        if (useTwoDigits) {
+          // One 2-digit number, one 1-digit number
+          num1 = Math.floor(Math.random() * (multiMax - 10 + 1)) + 10; // 10 to multiMax
+          num2 = Math.floor(Math.random() * 9) + 1; // 1 to 9
+          
+          // Randomly swap them
+          if (Math.random() > 0.5) {
+            [num1, num2] = [num2, num1];
+          }
+        } else {
+          // Both 1-digit numbers
+          num1 = Math.floor(Math.random() * 9) + 1; // 1 to 9
+          num2 = Math.floor(Math.random() * 9) + 1; // 1 to 9
+        }
+        
         answer = num1 * num2;
         displayOp = "×";
         break;

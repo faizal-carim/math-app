@@ -2,12 +2,9 @@ const mongoose = require("mongoose");
 
 const schoolSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  grades: [
-    {
-      name: String,      // e.g. "Grade 4"
-      year: Number       // optional, e.g. 2025
-    }
-  ]
+  grades: [{ name: String }],
+  licenseExpiry: { type: Date, required: true },
+  active: { type: Boolean, default: true }
 }, { timestamps: true });
 
 module.exports = mongoose.model("School", schoolSchema);

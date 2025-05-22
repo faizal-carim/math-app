@@ -89,17 +89,17 @@ export default function GameScreen({ onStop, onLogout }) {
       if (res.data.isCorrect) {
         setMessage('Correct!');
         setMessageIcon(<CorrectIcon />);
-        setIsAnimating(true);
       } else {
-        setMessage('Try again!');
+        setMessage('Incorrect');
         setMessageIcon(<IncorrectIcon />);
       }
       
+      setIsAnimating(true);
+      
+      // Always fetch a new question after a short delay, regardless of whether the answer was correct
       setTimeout(() => {
         setIsAnimating(false);
-        if (res.data.isCorrect) {
-          fetchQuestion();
-        }
+        fetchQuestion();
       }, 1500);
     } catch (err) {
       console.error('Error submitting answer:', err);
