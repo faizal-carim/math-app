@@ -21,7 +21,11 @@ router.post("/submit", authenticate, async (req, res) => {
       // Very simple eval replacement, safe because input is strictly math expressions from your server
       // You could enhance this if needed
       correctAnswer = Function(`return (${normalizedQuestion})`)();
+      
+      // Log for debugging
+      console.log(`Question: ${question}, Normalized: ${normalizedQuestion}, Correct Answer: ${correctAnswer}, User Answer: ${userAnswer}`);
     } catch (e) {
+      console.error("Error evaluating expression:", e);
       return res.status(400).json({ message: "Invalid question format" });
     }
 
@@ -33,10 +37,8 @@ router.post("/submit", authenticate, async (req, res) => {
     if (isCorrect) {
       user.gameStats.totalCorrect = (user.gameStats.totalCorrect || 0) + 1;
 
-      // Reward currency for every 30 correct answers
-      if (user.gameStats.totalCorrect % 30 === 0) {
-        user.currency = (user.currency || 0) + 1;
-      }
+      // Reward 1 coin for each correct answer
+      user.currency = (user.currency || 0) + 1;
     }
 
     // Update average time (rolling average)
@@ -48,6 +50,7 @@ router.post("/submit", authenticate, async (req, res) => {
     res.json({
       message: "Answer submitted",
       isCorrect,
+      correctAnswer, // Include correct answer in response for debugging
       totalCorrect: user.gameStats.totalCorrect,
       totalQuestions: user.gameStats.totalQuestions,
       averageTime: user.gameStats.averageTime,
@@ -59,6 +62,42 @@ router.post("/submit", authenticate, async (req, res) => {
   }
 });
 
+// New endpoint to handle skipped questions
+router.post("/skip", authenticate, async (req, res) => {
+  try {
+    const user = req.user;
+    
+    // Initialize skips counter if it doesn't exist
+    if (!user.gameStats.skippedQuestions) {
+      user.gameStats.skippedQuestions = 0;
+    }
+    
+    // Increment skips counter
+    user.gameStats.skippedQuestions += 1;
+    
+    // Check if user has reached 3 skips
+    if (user.gameStats.skippedQuestions >= 3) {
+      // Reset skip counter
+      user.gameStats.skippedQuestions = 0;
+      
+      // Deduct 1 coin if user has any
+      if (user.currency > 0) {
+        user.currency -= 1;
+      }
+    }
+    
+    await user.save();
+    
+    res.json({
+      message: "Question skipped",
+      skippedQuestions: user.gameStats.skippedQuestions,
+      currency: user.currency
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error skipping question", error: error.message });
+  }
+});
 
 router.get("/question", authenticate, async (req, res) => {
     const user = req.user;
@@ -102,8 +141,11 @@ router.get("/question", authenticate, async (req, res) => {
     }
   
     const questionText = `${num1} ${displayOp} ${num2}`;
+    
+    // Log for debugging
+    console.log(`Generated question: ${questionText}, Answer: ${answer}`);
   
-    // Optionally: store in DB or session, but here we just return directly
+    // Return the question data
     res.json({
       question: questionText,
       type: operation,
