@@ -2,14 +2,40 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './GameScreen.css';
+import { CoinIcon, SkipIcon, CorrectIcon, IncorrectIcon, LogoutIcon } from './Icons';
 
-export default function GameScreen({ onStop }) {
+export default function GameScreen({ onStop, onLogout }) {
   const [questionData, setQuestionData] = useState(null);
   const [userAnswer, setUserAnswer] = useState('');
   const [message, setMessage] = useState('');
+  const [messageIcon, setMessageIcon] = useState(null);
   const [startTime, setStartTime] = useState(null);
+  const [skipsRemaining, setSkipsRemaining] = useState(3);
+  const [currency, setCurrency] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [currentQuestion, setCurrentQuestion] = useState("Loading...");
+  const [userName, setUserName] = useState("Math Game");
 
   const token = localStorage.getItem('token');
+
+  // Fetch user profile to get initial currency and name
+  useEffect(() => {
+    async function fetchUserProfile() {
+      try {
+        const res = await axios.get('/api/user/profile', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setCurrency(res.data.currency || 0);
+        if (res.data.name) {
+          setUserName(res.data.name);
+        }
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+      }
+    }
+    
+    fetchUserProfile();
+  }, [token]);
 
   const fetchQuestion = async () => {
     try {
@@ -18,13 +44,23 @@ export default function GameScreen({ onStop }) {
           Authorization: `Bearer ${token}`
         }
       });
-      setQuestionData(res.data);
+      console.log("Question data:", res.data);
+      
+      if (res.data && res.data.question) {
+        setCurrentQuestion(res.data.question + " = ?");
+        setQuestionData(res.data);
+      } else {
+        setCurrentQuestion("Error loading question");
+      }
+      
       setUserAnswer('');
       setMessage('');
+      setMessageIcon(null);
       setStartTime(Date.now());
     } catch (err) {
       console.error('Error fetching question:', err);
       setMessage('Failed to load question.');
+      setCurrentQuestion("Error loading question");
     }
   };
 
@@ -38,7 +74,6 @@ export default function GameScreen({ onStop }) {
         '/api/game/submit',
         {
           question: questionData.question,
-          correctAnswer: eval(questionData.question.replace('×', '*')),
           userAnswer: Number(userAnswer),
           timeTaken
         },
@@ -49,11 +84,67 @@ export default function GameScreen({ onStop }) {
         }
       );
 
-      setMessage(res.data.isCorrect ? '✅ Correct!' : '❌ Incorrect');
-      setTimeout(fetchQuestion, 1500);
+      setCurrency(res.data.currency);
+      
+      if (res.data.isCorrect) {
+        setMessage('Correct!');
+        setMessageIcon(<CorrectIcon />);
+        setIsAnimating(true);
+      } else {
+        setMessage('Try again!');
+        setMessageIcon(<IncorrectIcon />);
+      }
+      
+      setTimeout(() => {
+        setIsAnimating(false);
+        if (res.data.isCorrect) {
+          fetchQuestion();
+        }
+      }, 1500);
     } catch (err) {
       console.error('Error submitting answer:', err);
       setMessage('Failed to submit answer.');
+    }
+  };
+
+  const skipQuestion = async () => {
+    try {
+      const res = await axios.post(
+        '/api/game/skip',
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      
+      // Update skips remaining (3 - current skips)
+      const skipsUsed = res.data.skippedQuestions;
+      setSkipsRemaining(3 - skipsUsed);
+      setCurrency(res.data.currency);
+      
+      // If skips reached 0, show message about coin deduction
+      if (skipsUsed === 0 && skipsRemaining !== 3) {
+        setMessage('Coin deducted!');
+        setMessageIcon(<CoinIcon />);
+        setTimeout(() => {
+          setMessage('');
+          setMessageIcon(null);
+          fetchQuestion();
+        }, 1500);
+      } else {
+        setMessage(`Skipped! (${3 - skipsUsed} left)`);
+        setMessageIcon(<SkipIcon />);
+        setTimeout(() => {
+          setMessage('');
+          setMessageIcon(null);
+          fetchQuestion();
+        }, 1000);
+      }
+    } catch (err) {
+      console.error('Error skipping question:', err);
+      setMessage('Failed to skip question.');
     }
   };
 
@@ -73,36 +164,71 @@ export default function GameScreen({ onStop }) {
 
   return (
     <div className="game-container">
-      <h2>Math Game</h2>
-      {questionData ? (
-        <div>
-          <p className="question-text">What is {questionData.question}?</p>
-          <input
-            type="text"
-            value={userAnswer}
-            readOnly
-            placeholder="Your answer"
-            className="answer-input"
-          />
-          <div className="keypad">
-            {['1','2','3','4','5','6','7','8','9','0','del','enter'].map((key) => (
-              <button
-                key={key}
-                className={`keypad-button ${key === 'enter' ? 'enter' : ''} ${key === 'del' ? 'del' : ''}`}
-                onClick={() => handleKeypadInput(key)}
-              >
-                {key === 'del' ? '⌫' : key === 'enter' ? '⏎' : key}
-              </button>
-            ))}
+      <div className="game-header">
+        <h2>{userName}</h2>
+        <div className="game-stats">
+          <div className="stat-item">
+            <CoinIcon />
+            <span>{currency} Coins</span>
           </div>
-          <div className="button-group">
-            <button className="game-button" onClick={onStop}>Stop</button>
+          <div className="stat-item">
+            <SkipIcon />
+            <span>{skipsRemaining} Skips</span>
           </div>
-          {message && <p className="message-text">{message}</p>}
         </div>
-      ) : (
-        <p>Loading question...</p>
-      )}
+      </div>
+
+      <div className="game-content">
+        <div className="question-section">
+          <h3>What is the answer?</h3>
+          <div className={`question-bubble ${isAnimating ? 'pop-animation' : ''}`}>
+            <div className="question-text">{currentQuestion}</div>
+          </div>
+        </div>
+        
+        <div className="answer-section">
+          <label htmlFor="answer">Your Answer:</label>
+          <div className="answer-display">
+            <div className="answer-box" id="answer">{userAnswer || '?'}</div>
+          </div>
+        </div>
+        
+        <div className="keypad">
+          {['1','2','3','4','5','6','7','8','9','0','del','enter'].map((key) => (
+            <button
+              key={key}
+              className={`keypad-button ${key === 'enter' ? 'enter' : ''} ${key === 'del' ? 'del' : ''}`}
+              onClick={() => handleKeypadInput(key)}
+            >
+              {key === 'del' ? '⌫' : key === 'enter' ? 'Enter' : key}
+            </button>
+          ))}
+        </div>
+        
+        <div className="game-actions">
+          <button className="game-button skip-button" onClick={skipQuestion}>
+            <SkipIcon />
+            <span>Skip</span>
+          </button>
+          <button className="game-button stop-button" onClick={onStop}>
+            <span>Profile</span>
+          </button>
+        </div>
+        
+        <div className="logout-container">
+          <button className="logout-button" onClick={onLogout}>
+            <LogoutIcon />
+            <span>Logout</span>
+          </button>
+        </div>
+        
+        {message && (
+          <div className="message-container">
+            {messageIcon}
+            <p className="message-text">{message}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

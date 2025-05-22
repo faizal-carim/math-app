@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema({
     totalCorrect: { type: Number, default: 0 },
     totalQuestions: { type: Number, default: 0 },
     averageTime: { type: Number, default: 0 },
+    skippedQuestions: { type: Number, default: 0 }
   },  
   stats: {
     correctAnswers: { type: Number, default: 0 },

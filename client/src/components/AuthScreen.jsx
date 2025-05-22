@@ -52,6 +52,7 @@ export default function AuthScreen({ onAuthSuccess }) {
       localStorage.setItem('token', token);
       localStorage.setItem('userId', userId);
       
+      // Call onAuthSuccess to navigate to profile page
       onAuthSuccess();
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong');
