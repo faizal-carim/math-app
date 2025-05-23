@@ -1,0 +1,21 @@
+services:
+  # Static site for React frontend
+  - type: web
+    name: math-game-client
+    runtime: static
+    buildCommand: cd client && npm install && npm run build
+    staticPublishPath: ./client/dist
+    envVars:
+      - key: NODE_VERSION
+        value: 18.x
+
+  # Backend API service (your existing service)
+  # Uncomment and adjust if you want to define your backend here too
+  # - type: web
+  #   name: math-game-api
+  #   runtime: node
+  #   buildCommand: cd server && npm install
+  #   startCommand: cd server && node src/index.js
+  #   envVars:
+  #     - key: NODE_VERSION
+  #       value: 18.x
