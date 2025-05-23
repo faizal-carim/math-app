@@ -1,24 +1,30 @@
 :root {
-  --primary-color: #6200ea;
-  --secondary-color: #03a9f4;
-  --accent-color: #ff9100;
-  --danger-color: #f44336;
+  --primary-color: #4a6bff;
+  --secondary-color: #00b4d8;
+  --accent-color: #ff9e00;
+  --danger-color: #ff5252;
   --success-color: #4caf50;
-  --background-color: #121212;
-  --surface-color: #1e1e1e;
-  --card-color: #2d2d2d;
-  --text-color: #ffffff;
+  --background-color: #1a1a2e;
+  --surface-color: #16213e;
+  --card-color: #0f3460;
+  --text-color: #e2e2e2;
   --text-secondary: #b0b0b0;
-  --border-color: #424242;
-  --border-radius: 8px;
-  --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  --input-bg: #333333;
+  --border-color: #2a4494;
+  --border-radius: 12px;
+  --shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  --input-bg: #2c3e50;
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -31,6 +37,12 @@ body {
   line-height: 1.6;
 }
 
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 button {
   cursor: pointer;
   font-family: inherit;
@@ -38,13 +50,15 @@ button {
   border-radius: var(--border-radius);
   transition: all 0.2s ease;
   font-weight: 500;
-  padding: 10px 16px;
+  padding: 12px 18px;
   color: var(--text-color);
+  background-color: var(--primary-color);
 }
 
 button:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow);
+  filter: brightness(1.1);
 }
 
 button:active {
@@ -56,15 +70,16 @@ input, select, textarea {
   border: 1px solid var(--border-color);
   color: var(--text-color);
   border-radius: var(--border-radius);
-  padding: 10px 12px;
-  font-size: 14px;
+  padding: 12px 14px;
+  font-size: 16px;
   transition: all 0.2s ease;
+  width: 100%;
 }
 
 input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(98, 0, 234, 0.2);
+  box-shadow: 0 0 0 2px rgba(74, 107, 255, 0.2);
 }
 
 .icon-button {
@@ -72,8 +87,8 @@ input:focus, select:focus, textarea:focus {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 16px;
-  font-size: 14px;
+  padding: 12px 18px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--text-color);
 }
@@ -81,21 +96,23 @@ input:focus, select:focus, textarea:focus {
 .icon-text {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   color: var(--text-color);
 }
 
 .card {
   background-color: var(--card-color);
   border-radius: var(--border-radius);
-  padding: 20px;
+  padding: 24px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border-color);
   color: var(--text-color);
+  width: 100%;
+  max-width: 100%;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 500;
+  font-weight: 600;
   margin-bottom: 16px;
   color: var(--text-color);
 }
@@ -115,20 +132,31 @@ p, span, div {
 
 label {
   color: var(--text-color);
+  font-weight: 500;
+  margin-bottom: 8px;
+  display: block;
 }
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
-  .icon-button {
-    padding: 12px;
-  }
-  
-  .icon-button span {
-    display: none;
+  body {
+    padding: 0;
   }
   
   .card {
-    padding: 16px;
+    padding: 20px;
+    border-radius: 0;
+  }
+  
+  button, .icon-button {
+    padding: 14px 16px;
+    font-size: 16px;
+    width: 100%;
+  }
+  
+  input, select, textarea {
+    padding: 14px;
+    font-size: 16px;
   }
 }
 

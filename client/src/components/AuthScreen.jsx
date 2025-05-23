@@ -1,101 +1,105 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import './AuthScreen.css';
 import API_URL from '../config';
+import './AuthScreen.css';
 
-export default function AuthScreen({ onAuthSuccess }) {
+const AuthScreen = ({ onLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    grade: '',
-    schoolId: ''
-  });
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [school, setSchool] = useState('');
   const [error, setError] = useState('');
-  const [schools, setSchools] = useState([]);
-  const [grades, setGrades] = useState([]);
-
-  useEffect(() => {
-    // Fetch schools on component mount
-    async function fetchSchools() {
-      try {
-        const res = await axios.get(`${API_URL}/api/schools`);
-        setSchools(res.data);
-      } catch (err) {
-        console.error('Error fetching schools', err);
-      }
-    }
-    fetchSchools();
-  }, []);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSchoolChange = (e) => {
-    const selectedSchoolId = e.target.value;
-    const selectedSchool = schools.find(s => s._id === selectedSchoolId);
-    setFormData({ ...formData, schoolId: selectedSchoolId, grade: '' });
-    setGrades(selectedSchool ? selectedSchool.grades : []);
-  };
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const url = isLogin ? `${API_URL}/api/auth/login` : `${API_URL}/api/auth/register`;
-      const payload = isLogin
-        ? { username: formData.username, password: formData.password }
-        : formData;
+    setError('');
+    setLoading(true);
 
-      const res = await axios.post(url, payload);
-      const { token, userId } = res.data; 
-      localStorage.setItem('token', token);
-      localStorage.setItem('userId', userId);
+    try {
+      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+      const payload = isLogin 
+        ? { username, password } 
+        : { username, password, school };
       
-      // Call onAuthSuccess to navigate to profile page
-      onAuthSuccess();
+      const response = await axios.post(`${API_URL}${endpoint}`, payload);
+      
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        onLogin(response.data.user);
+      } else {
+        setError('Authentication failed. Please try again.');
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong');
+      setError(err.response?.data?.message || 'An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
+  const toggleAuthMode = () => {
+    setIsLogin(!isLogin);
+    setError('');
+  };
+
   return (
-    <div className="auth-container">
-      <h2>{isLogin ? 'Login' : 'Register'}</h2>
-      <form onSubmit={handleSubmit} className="auth-form">
-        <input name="username" placeholder="Username" onChange={handleChange} required />
-        {!isLogin && (
-          <input name="email" placeholder="Email" type="email" onChange={handleChange} required />
-        )}
-        <input name="password" placeholder="Password" type="password" onChange={handleChange} required />
-  
-        {!isLogin && (
-          <>
-            <select name="schoolId" onChange={handleSchoolChange} required value={formData.schoolId}>
-              <option value="">Select School</option>
-              {schools.map(school => (
-                <option key={school._id} value={school._id}>{school.name}</option>
-              ))}
-            </select>
-  
-            <select name="grade" onChange={handleChange} required value={formData.grade} disabled={!grades.length}>
-              <option value="">Select Grade</option>
-              {grades.map(g => (
-                <option key={g._id} value={g.name}>{g.name}</option>
-              ))}
-            </select>
-          </>
-        )}
-  
-        <button type="submit">{isLogin ? 'Login' : 'Register'}</button>
-      </form>
-  
-      {error && <p className="auth-error">{error}</p>}
-  
-      <button onClick={() => setIsLogin(!isLogin)} className="toggle-auth-button">
-        {isLogin ? 'Need to register?' : 'Already have an account?'}
-      </button>
+    <div className="auth-wrapper">
+      <div className="auth-container">
+        <h2>{isLogin ? 'Login to Math Game' : 'Create an Account'}</h2>
+        
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              placeholder="Enter your username"
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="Enter your password"
+            />
+          </div>
+          
+          {!isLogin && (
+            <div className="form-group">
+              <label htmlFor="school">School</label>
+              <input
+                type="text"
+                id="school"
+                value={school}
+                onChange={(e) => setSchool(e.target.value)}
+                required
+                placeholder="Enter your school name"
+              />
+            </div>
+          )}
+          
+          <button type="submit" disabled={loading}>
+            {loading ? 'Please wait...' : isLogin ? 'Login' : 'Register'}
+          </button>
+        </form>
+        
+        {error && <div className="auth-error">{error}</div>}
+        
+        <button className="toggle-auth-button" onClick={toggleAuthMode}>
+          {isLogin ? 'Need an account? Register' : 'Already have an account? Login'}
+        </button>
+      </div>
     </div>
   );
-}
+};
+
+export default AuthScreen;

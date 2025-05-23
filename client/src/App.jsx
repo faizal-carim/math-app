@@ -1,97 +1,93 @@
-import React, { useState, useEffect } from "react";
-import AuthScreen from "./components/AuthScreen";
-import GameScreen from "./components/GameScreen";
-import ProfileScreen from "./components/ProfileScreen";
-import StoreScreen from "./components/StoreScreen";
-import AdminScreen from "./components/AdminScreen";
+import React, { useState, useEffect } from 'react';
+import AuthScreen from './components/AuthScreen';
+import GameScreen from './components/GameScreen';
+import AdminScreen from './components/AdminScreen';
+import ProfileScreen from './components/ProfileScreen';
+import StoreScreen from './components/StoreScreen';
 
-export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
-  const [currentScreen, setCurrentScreen] = useState("profile");
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [username, setUsername] = useState("");
+const App = () => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [currentScreen, setCurrentScreen] = useState('game');
 
-  // Check if user is admin
   useEffect(() => {
-    const checkUserStatus = async () => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        try {
-          const res = await fetch("/api/user/profile", {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          const data = await res.json();
-          setUsername(data.username);
-          
-          // Case-insensitive comparison and debug logging
-          const isFaizal = data.username && data.username.toLowerCase() === "faizal";
-          console.log("Username:", data.username, "Is Admin:", isFaizal);
-          setIsAdmin(isFaizal);
-          
-          // Force admin for testing if needed
-          // setIsAdmin(true);
-        } catch (err) {
-          console.error("Error checking user status:", err);
-        }
+    // Check if user is already logged in
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error('Error parsing stored user:', error);
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
       }
-    };
-    
-    if (isAuthenticated) {
-      checkUserStatus();
     }
-  }, [isAuthenticated]);
+    setLoading(false);
+  }, []);
 
-  // Handle successful authentication
-  const handleAuthSuccess = () => {
-    setIsAuthenticated(true);
-    setCurrentScreen("profile");
+  const handleLogin = (userData) => {
+    setUser(userData);
   };
 
-  // Handle logout
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userId");
-    setIsAuthenticated(false);
-    setIsAdmin(false);
-    setUsername("");
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    setCurrentScreen('game');
   };
 
-  if (!isAuthenticated) {
-    return <AuthScreen onAuthSuccess={handleAuthSuccess} />;
+  const renderScreen = () => {
+    if (!user) {
+      return <AuthScreen onLogin={handleLogin} />;
+    }
+
+    switch (currentScreen) {
+      case 'admin':
+        return user.role === 'admin' ? (
+          <AdminScreen onBack={() => setCurrentScreen('game')} />
+        ) : (
+          <GameScreen 
+            user={user} 
+            onLogout={handleLogout}
+            onNavigate={setCurrentScreen}
+          />
+        );
+      case 'profile':
+        return (
+          <ProfileScreen 
+            user={user} 
+            onBack={() => setCurrentScreen('game')}
+            onLogout={handleLogout}
+          />
+        );
+      case 'store':
+        return (
+          <StoreScreen 
+            user={user} 
+            onBack={() => setCurrentScreen('game')}
+          />
+        );
+      case 'game':
+      default:
+        return (
+          <GameScreen 
+            user={user} 
+            onLogout={handleLogout}
+            onNavigate={setCurrentScreen}
+          />
+        );
+    }
+  };
+
+  if (loading) {
+    return <div className="loading">Loading...</div>;
   }
 
-  console.log("Current state - isAdmin:", isAdmin, "username:", username);
+  return (
+    <div className="app-container">
+      {renderScreen()}
+    </div>
+  );
+};
 
-  switch (currentScreen) {
-    case "admin":
-      return <AdminScreen onBack={() => setCurrentScreen("profile")} onLogout={handleLogout} />;
-    case "profile":
-      return <ProfileScreen 
-        onBack={() => setCurrentScreen("game")} 
-        onStoreClick={() => setCurrentScreen("store")}
-        onAdminClick={() => setCurrentScreen("admin")}
-        onLogout={handleLogout}
-        isAdmin={isAdmin}
-        username={username}
-      />;
-    case "store":
-      return <StoreScreen 
-        onBack={() => setCurrentScreen("profile")}
-        onLogout={handleLogout}
-      />;
-    case "game":
-      return <GameScreen 
-        onStop={() => setCurrentScreen("profile")}
-        onLogout={handleLogout}
-      />;
-    default:
-      return <ProfileScreen 
-        onBack={() => setCurrentScreen("game")} 
-        onStoreClick={() => setCurrentScreen("store")}
-        onAdminClick={() => setCurrentScreen("admin")}
-        onLogout={handleLogout}
-        isAdmin={isAdmin}
-        username={username}
-      />;
-  }
-}
+export default App;

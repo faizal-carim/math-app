@@ -1,27 +1,34 @@
 .game-container {
-  max-width: 500px;
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 24px;
+  padding: 16px;
   color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 .game-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .game-header h2 {
   font-size: 24px;
-  color: var(--primary-color);
+  color: var(--accent-color);
   margin: 0;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .game-stats {
   display: flex;
-  gap: 16px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .stat-item {
@@ -30,7 +37,7 @@
   gap: 8px;
   font-weight: 500;
   font-size: 14px;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--surface-color);
   padding: 8px 16px;
   border-radius: 20px;
   border: 1px solid var(--border-color);
@@ -41,12 +48,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 24px;
+  padding: 20px;
   background-color: var(--card-color);
   border-radius: var(--border-radius);
   box-shadow: var(--shadow);
   border: 1px solid var(--border-color);
   color: var(--text-color);
+  flex: 1;
+  width: 100%;
 }
 
 .question-section {
@@ -64,11 +73,11 @@
 }
 
 .question-bubble {
-  background-color: #6200ea;
-  color: white;
+  background-color: var(--primary-color);
+  color: var(--text-color);
   padding: 20px 32px;
   border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(98, 0, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(74, 107, 255, 0.3);
   display: inline-block;
   min-width: 180px;
   position: relative;
@@ -89,9 +98,9 @@
 
 .question-text {
   font-size: 32px;
-  font-weight: 500;
+  font-weight: 600;
   text-align: center;
-  color: white;
+  color: var(--text-color);
 }
 
 .answer-section {
@@ -104,7 +113,7 @@
   margin-bottom: 8px;
   font-weight: 500;
   color: var(--text-color);
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .answer-display {
@@ -113,7 +122,7 @@
 }
 
 .answer-box {
-  background-color: var(--input-bg);
+  background-color: var(--surface-color);
   border: 2px solid var(--accent-color);
   border-radius: var(--border-radius);
   padding: 16px;
@@ -138,7 +147,7 @@
   padding: 16px;
   font-size: 24px;
   font-weight: 500;
-  background-color: var(--input-bg);
+  background-color: var(--surface-color);
   color: var(--text-color);
   border-radius: var(--border-radius);
   transition: all 0.2s ease;
@@ -148,7 +157,7 @@
 .keypad-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--input-bg);
 }
 
 .keypad-button:active {
@@ -156,22 +165,22 @@
 }
 
 .keypad-button.enter {
-  background-color: #6200ea;
-  color: white;
+  background-color: var(--primary-color);
+  color: var(--text-color);
   grid-column: span 2;
 }
 
 .keypad-button.enter:hover {
-  background-color: #7c4dff;
+  background-color: #5a78ff;
 }
 
 .keypad-button.del {
-  background-color: #6200ea;
-  color: white;
+  background-color: var(--danger-color);
+  color: var(--text-color);
 }
 
 .keypad-button.del:hover {
-  background-color: #e53935;
+  background-color: #ff6b6b;
 }
 
 .game-actions {
@@ -179,6 +188,7 @@
   justify-content: space-between;
   width: 100%;
   margin-top: 16px;
+  gap: 12px;
 }
 
 .game-button {
@@ -186,30 +196,31 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 12px 24px;
-  font-size: 14px;
+  padding: 14px 20px;
+  font-size: 16px;
   font-weight: 500;
   border-radius: var(--border-radius);
   transition: all 0.2s ease;
-  color: white;
+  color: var(--text-color);
+  flex: 1;
 }
 
 .skip-button {
-  background-color: #6200ea;
-  color: white;
+  background-color: var(--accent-color);
+  color: var(--text-color);
 }
 
 .skip-button:hover {
-  background-color: #ffab40;
+  background-color: #ffb133;
 }
 
 .stop-button {
-  background-color: #6200ea;
-  color: white;
+  background-color: var(--secondary-color);
+  color: var(--text-color);
 }
 
 .stop-button:hover {
-  background-color: #29b6f6;
+  background-color: #22c1ed;
 }
 
 .logout-container {
@@ -220,18 +231,18 @@
 }
 
 .logout-button {
-  background-color: #6200ea;
-  color: #6200ea;;
-  padding: 8px 16px;
+  background-color: var(--danger-color);
+  color: var(--text-color);
+  padding: 12px 20px;
   border-radius: var(--border-radius);
-  font-size: 14px;
+  font-size: 16px;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .logout-button:hover {
-  background-color: #e53935;
+  background-color: #ff6b6b;
 }
 
 .message-container {
@@ -241,10 +252,11 @@
   gap: 12px;
   margin-top: 24px;
   padding: 12px 24px;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--surface-color);
   border-radius: 24px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border: 1px solid var(--border-color);
+  width: 100%;
 }
 
 .message-text {
@@ -273,8 +285,14 @@
 }
 
 /* Mobile responsiveness */
-@media (max-width: 500px) {
+@media (max-width: 768px) {
   .game-container {
+    padding: 12px;
+    min-height: 100vh;
+  }
+  
+  .game-content {
+    border-radius: 12px;
     padding: 16px;
   }
   
@@ -283,15 +301,20 @@
   }
   
   .keypad-button {
-    padding: 12px;
-    font-size: 20px;
+    padding: 16px 8px;
+    font-size: 22px;
   }
   
-  .game-button span {
-    display: none;
+  .game-actions {
+    flex-direction: column;
   }
   
   .game-button {
-    padding: 12px;
+    width: 100%;
+    padding: 16px;
+  }
+  
+  .answer-box {
+    font-size: 28px;
   }
 }
