@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './AdminScreen.css';
+import API_URL from '../config';
 
 export default function AdminScreen({ onBack, onLogout }) {
   const [schools, setSchools] = useState([]);
@@ -24,8 +25,7 @@ export default function AdminScreen({ onBack, onLogout }) {
       // Log the request for debugging
       console.log('Fetching schools with token:', token);
       
-      // Use the full URL for debugging
-      const res = await axios.get('http://localhost:3001/api/admin/schools', {
+      const res = await axios.get(`${API_URL}/api/admin/schools`, {
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -51,8 +51,7 @@ export default function AdminScreen({ onBack, onLogout }) {
       // Log the request for debugging
       console.log('Adding school:', { ...newSchool, grades });
       
-      // Use the full URL for debugging
-      const res = await axios.post('http://localhost:3001/api/admin/schools', 
+      const res = await axios.post(`${API_URL}/api/admin/schools`, 
         { ...newSchool, grades },
         { 
           headers: { 
@@ -83,8 +82,7 @@ export default function AdminScreen({ onBack, onLogout }) {
     setLoading(true);
     setError(null);
     try {
-      // Use the full URL for debugging
-      const res = await axios.put(`http://localhost:3001/api/admin/schools/${selectedSchool._id}/renew`, 
+      const res = await axios.put(`${API_URL}/api/admin/schools/${selectedSchool._id}/renew`, 
         { licenseExpiry: selectedSchool.licenseExpiry },
         { 
           headers: { 

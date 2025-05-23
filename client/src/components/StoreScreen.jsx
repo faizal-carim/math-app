@@ -8,6 +8,7 @@ import {
   GlassesIcon, 
   ShirtIcon 
 } from './Icons';
+import API_URL from '../config';
 
 export default function StoreScreen({ onBack }) {
   const [storeItems, setStoreItems] = useState([]);
@@ -27,13 +28,13 @@ export default function StoreScreen({ onBack }) {
     async function fetchData() {
       try {
         // Fetch store items
-        const itemsRes = await axios.get("/api/store/items", {
+        const itemsRes = await axios.get(`${API_URL}/api/store/items`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setStoreItems(itemsRes.data);
         
         // Fetch user profile
-        const profileRes = await axios.get("/api/user/profile", {
+        const profileRes = await axios.get(`${API_URL}/api/user/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUserProfile(profileRes.data);
@@ -68,7 +69,7 @@ export default function StoreScreen({ onBack }) {
     
     try {
       const res = await axios.post(
-        "/api/store/buy",
+        `${API_URL}/api/store/buy`,
         { itemId: selectedItem._id },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -76,7 +77,7 @@ export default function StoreScreen({ onBack }) {
       setMessage(`Purchased ${selectedItem.name}!`);
       
       // Update user profile after purchase
-      const profileRes = await axios.get("/api/user/profile", {
+      const profileRes = await axios.get(`${API_URL}/api/user/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUserProfile(profileRes.data);
@@ -93,7 +94,7 @@ export default function StoreScreen({ onBack }) {
     
     try {
       await axios.post(
-        "/api/store/equip",
+        `${API_URL}/api/store/equip`,
         { itemId: selectedItem._id },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -101,7 +102,7 @@ export default function StoreScreen({ onBack }) {
       setMessage(`${selectedItem.name} equipped!`);
       
       // Update user profile after equipping
-      const profileRes = await axios.get("/api/user/profile", {
+      const profileRes = await axios.get(`${API_URL}/api/user/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUserProfile(profileRes.data);

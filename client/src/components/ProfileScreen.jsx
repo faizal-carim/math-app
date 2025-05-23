@@ -15,6 +15,7 @@ import {
   LogoutIcon,
   AdminIcon
 } from './Icons';
+import API_URL from '../config';
 
 export default function ProfileScreen({ onBack, onStoreClick, onLogout, onAdminClick, isAdmin, username }) {
   const [profile, setProfile] = useState(null);
@@ -29,7 +30,7 @@ export default function ProfileScreen({ onBack, onStoreClick, onLogout, onAdminC
     async function fetchData() {
       try {
         // Fetch profile first
-        const res = await axios.get("/api/user/profile", {
+        const res = await axios.get(`${API_URL}/api/user/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const userProfile = res.data;
@@ -38,13 +39,13 @@ export default function ProfileScreen({ onBack, onStoreClick, onLogout, onAdminC
         const { grade, schoolId } = userProfile;
   
         // Fetch global leaderboard filtered by grade
-        const globalRes = await axios.get(`/api/leaderboard/global?grade=${grade}`, {
+        const globalRes = await axios.get(`${API_URL}/api/leaderboard/global?grade=${grade}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setGlobalLeaderboard(globalRes.data);
   
         // Fetch school leaderboard filtered by school and grade
-        const schoolRes = await axios.get(`/api/leaderboard/school?schoolId=${schoolId}&grade=${grade}`, {
+        const schoolRes = await axios.get(`${API_URL}/api/leaderboard/school?schoolId=${schoolId}&grade=${grade}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setSchoolLeaderboard(schoolRes.data);

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './GameScreen.css';
 import { CoinIcon, SkipIcon, CorrectIcon, IncorrectIcon, LogoutIcon } from './Icons';
+import API_URL from '../config';
 
 export default function GameScreen({ onStop, onLogout }) {
   const [questionData, setQuestionData] = useState(null);
@@ -22,7 +23,7 @@ export default function GameScreen({ onStop, onLogout }) {
   useEffect(() => {
     async function fetchUserProfile() {
       try {
-        const res = await axios.get('/api/user/profile', {
+        const res = await axios.get(`${API_URL}/api/user/profile`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setCurrency(res.data.currency || 0);
@@ -39,7 +40,7 @@ export default function GameScreen({ onStop, onLogout }) {
 
   const fetchQuestion = async () => {
     try {
-      const res = await axios.get('/api/game/question', {
+      const res = await axios.get(`${API_URL}/api/game/question`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -71,7 +72,7 @@ export default function GameScreen({ onStop, onLogout }) {
 
     try {
       const res = await axios.post(
-        '/api/game/submit',
+        `${API_URL}/api/game/submit`,
         {
           question: questionData.question,
           userAnswer: Number(userAnswer),
@@ -110,7 +111,7 @@ export default function GameScreen({ onStop, onLogout }) {
   const skipQuestion = async () => {
     try {
       const res = await axios.post(
-        '/api/game/skip',
+        `${API_URL}/api/game/skip`,
         {},
         {
           headers: {

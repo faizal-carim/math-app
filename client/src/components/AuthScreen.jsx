@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './AuthScreen.css';
+import API_URL from '../config';
 
 export default function AuthScreen({ onAuthSuccess }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -19,7 +20,7 @@ export default function AuthScreen({ onAuthSuccess }) {
     // Fetch schools on component mount
     async function fetchSchools() {
       try {
-        const res = await axios.get('http://localhost:3001/api/schools');
+        const res = await axios.get(`${API_URL}/api/schools`);
         setSchools(res.data);
       } catch (err) {
         console.error('Error fetching schools', err);
@@ -42,7 +43,7 @@ export default function AuthScreen({ onAuthSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const url = isLogin ? '/api/auth/login' : '/api/auth/register';
+      const url = isLogin ? `${API_URL}/api/auth/login` : `${API_URL}/api/auth/register`;
       const payload = isLogin
         ? { username: formData.username, password: formData.password }
         : formData;
