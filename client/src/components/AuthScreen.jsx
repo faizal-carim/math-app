@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+// Configure axios defaults
+axios.defaults.withCredentials = false; // Ensure no credentials are sent
 import API_URL from '../config';
 import './AuthScreen.css';
 
@@ -22,7 +24,13 @@ const AuthScreen = ({ onLogin }) => {
         ? { username, password } 
         : { username, password, school };
       
-      const response = await axios.post(`${API_URL}${endpoint}`, payload);
+      // Add headers to fix CORS issues
+      const response = await axios.post(`${API_URL}${endpoint}`, payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
       
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
