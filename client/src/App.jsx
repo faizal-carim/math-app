@@ -8,7 +8,7 @@ import StoreScreen from './components/StoreScreen';
 const App = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [currentScreen, setCurrentScreen] = useState('game');
+  const [currentScreen, setCurrentScreen] = useState('profile');
 
   useEffect(() => {
     // Check if user is already logged in
@@ -34,6 +34,7 @@ const App = () => {
   const handleLogin = (userData) => {
     console.log('Login handler called with user data:', userData);
     setUser(userData);
+    setCurrentScreen('profile'); // Navigate to profile page after login
   };
 
   const handleLogout = () => {

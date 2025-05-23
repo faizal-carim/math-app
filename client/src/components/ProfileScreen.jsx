@@ -17,7 +17,7 @@ import {
 } from './Icons';
 import API_URL from '../config';
 
-export default function ProfileScreen({ onBack, onStoreClick, onLogout, onAdminClick, isAdmin, username }) {
+export default function ProfileScreen({ user, onBack, onLogout, onNavigate }) {
   const [profile, setProfile] = useState(null);
   const [globalLeaderboard, setGlobalLeaderboard] = useState([]);
   const [schoolLeaderboard, setSchoolLeaderboard] = useState([]);
@@ -148,8 +148,8 @@ export default function ProfileScreen({ onBack, onStoreClick, onLogout, onAdminC
           </div>
         </div>
         <div className="profile-actions">
-          {(isAdmin || isFaizalUser) && (
-            <button className="profile-button admin-button icon-button" onClick={onAdminClick}>
+          {(user?.role === 'admin' || isFaizalUser) && (
+            <button className="profile-button admin-button icon-button" onClick={() => onNavigate('admin')}>
               <AdminIcon />
               <span>Admin</span>
             </button>
@@ -158,11 +158,11 @@ export default function ProfileScreen({ onBack, onStoreClick, onLogout, onAdminC
             <LogoutIcon />
             <span>Logout</span>
           </button>
-          <button className="profile-button store-button icon-button" onClick={onStoreClick}>
+          <button className="profile-button store-button icon-button" onClick={() => onNavigate('store')}>
             <StoreIcon />
             <span>Store</span>
           </button>
-          <button className="profile-button play-button icon-button" onClick={onBack}>
+          <button className="profile-button play-button icon-button" onClick={() => onNavigate('game')}>
             <PlayIcon />
             <span>Play</span>
           </button>
@@ -251,7 +251,7 @@ export default function ProfileScreen({ onBack, onStoreClick, onLogout, onAdminC
                 <span>{avatar?.equipped?.shirt || "None"}</span>
               </div>
             </div>
-            <button className="store-button icon-button" onClick={onStoreClick}>
+            <button className="store-button icon-button" onClick={() => onNavigate('store')}>
               <StoreIcon />
               <span>Go to Store</span>
             </button>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 // Configure axios defaults
 axios.defaults.withCredentials = false; // Ensure no credentials are sent
@@ -10,8 +10,35 @@ const AuthScreen = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [school, setSchool] = useState('');
+  const [schools, setSchools] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingSchools, setLoadingSchools] = useState(false);
+
+  // Fetch schools for registration
+  useEffect(() => {
+    if (!isLogin) {
+      fetchSchools();
+    }
+  }, [isLogin]);
+
+  const fetchSchools = async () => {
+    try {
+      setLoadingSchools(true);
+      const response = await axios.get(`${API_URL}/api/school/list`);
+      if (response.data && Array.isArray(response.data)) {
+        setSchools(response.data);
+        if (response.data.length > 0) {
+          setSchool(response.data[0].name); // Set default selection
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching schools:', err);
+      setError('Failed to load schools. Please try again.');
+    } finally {
+      setLoadingSchools(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -97,18 +124,27 @@ const AuthScreen = ({ onLogin }) => {
           {!isLogin && (
             <div className="form-group">
               <label htmlFor="school">School</label>
-              <input
-                type="text"
-                id="school"
-                value={school}
-                onChange={(e) => setSchool(e.target.value)}
-                required
-                placeholder="Enter your school name"
-              />
+              {loadingSchools ? (
+                <div className="loading-schools">Loading schools...</div>
+              ) : (
+                <select
+                  id="school"
+                  value={school}
+                  onChange={(e) => setSchool(e.target.value)}
+                  required
+                >
+                  <option value="" disabled>Select your school</option>
+                  {schools.map((schoolItem) => (
+                    <option key={schoolItem._id} value={schoolItem.name}>
+                      {schoolItem.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
           )}
           
-          <button type="submit" disabled={loading}>
+          <button type="submit" disabled={loading || (!isLogin && loadingSchools)}>
             {loading ? 'Please wait...' : isLogin ? 'Login' : 'Register'}
           </button>
         </form>
