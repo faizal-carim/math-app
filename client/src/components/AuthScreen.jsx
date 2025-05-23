@@ -25,7 +25,7 @@ const AuthScreen = ({ onLogin }) => {
   const fetchSchools = async () => {
     try {
       setLoadingSchools(true);
-      const response = await axios.get(`${API_URL}/api/school/list`);
+      const response = await axios.get(`${API_URL}/api/school`);
       if (response.data && Array.isArray(response.data)) {
         setSchools(response.data);
         if (response.data.length > 0) {
