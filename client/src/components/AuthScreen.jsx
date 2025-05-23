@@ -10,10 +10,14 @@ const AuthScreen = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [school, setSchool] = useState('');
+  const [schoolId, setSchoolId] = useState('');
+  const [grade, setGrade] = useState('');
   const [schools, setSchools] = useState([]);
+  const [grades, setGrades] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingSchools, setLoadingSchools] = useState(false);
+  const [loadingGrades, setLoadingGrades] = useState(false);
 
   // Fetch schools for registration
   useEffect(() => {
@@ -21,6 +25,13 @@ const AuthScreen = ({ onLogin }) => {
       fetchSchools();
     }
   }, [isLogin]);
+
+  // Fetch grades when school changes
+  useEffect(() => {
+    if (schoolId && !isLogin) {
+      fetchGrades(schoolId);
+    }
+  }, [schoolId, isLogin]);
 
   const fetchSchools = async () => {
     try {
@@ -31,7 +42,8 @@ const AuthScreen = ({ onLogin }) => {
         if (response.data && Array.isArray(response.data)) {
           setSchools(response.data);
           if (response.data.length > 0) {
-            setSchool(response.data[0].name); // Set default selection
+            setSchool(response.data[0].name);
+            setSchoolId(response.data[0]._id);
           }
           return;
         }
@@ -42,7 +54,8 @@ const AuthScreen = ({ onLogin }) => {
         if (response.data && Array.isArray(response.data)) {
           setSchools(response.data);
           if (response.data.length > 0) {
-            setSchool(response.data[0].name); // Set default selection
+            setSchool(response.data[0].name);
+            setSchoolId(response.data[0]._id);
           }
         }
       }
@@ -50,15 +63,68 @@ const AuthScreen = ({ onLogin }) => {
       console.error('Error fetching schools:', err);
       // Use hardcoded schools as last resort
       const defaultSchools = [
-        { _id: '1', name: 'School A' },
-        { _id: '2', name: 'School B' },
-        { _id: '3', name: 'School C' }
+        { _id: '1', name: 'School A', grades: [{ name: 'Grade 1' }, { name: 'Grade 2' }] },
+        { _id: '2', name: 'School B', grades: [{ name: 'Grade 3' }, { name: 'Grade 4' }] },
+        { _id: '3', name: 'School C', grades: [{ name: 'Grade 5' }, { name: 'Grade 6' }] }
       ];
       setSchools(defaultSchools);
       setSchool(defaultSchools[0].name);
+      setSchoolId(defaultSchools[0]._id);
+      setGrades(defaultSchools[0].grades);
+      if (defaultSchools[0].grades.length > 0) {
+        setGrade(defaultSchools[0].grades[0].name);
+      }
     } finally {
       setLoadingSchools(false);
     }
+  };
+
+  const fetchGrades = async (id) => {
+    try {
+      setLoadingGrades(true);
+      setGrade(''); // Reset grade when school changes
+      
+      // Try to get grades from the school object first
+      const selectedSchool = schools.find(s => s._id === id);
+      if (selectedSchool && selectedSchool.grades) {
+        setGrades(selectedSchool.grades);
+        if (selectedSchool.grades.length > 0) {
+          setGrade(selectedSchool.grades[0].name);
+        }
+        setLoadingGrades(false);
+        return;
+      }
+      
+      // If grades not in school object, fetch from API
+      try {
+        const response = await axios.get(`${API_URL}/api/school/${id}/grades`);
+        if (response.data && Array.isArray(response.data)) {
+          setGrades(response.data);
+          if (response.data.length > 0) {
+            setGrade(response.data[0].name);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching grades:', err);
+        // Use default grades as fallback
+        const defaultGrades = [
+          { name: 'Grade 1' },
+          { name: 'Grade 2' },
+          { name: 'Grade 3' }
+        ];
+        setGrades(defaultGrades);
+        setGrade(defaultGrades[0].name);
+      }
+    } finally {
+      setLoadingGrades(false);
+    }
+  };
+
+  const handleSchoolChange = (e) => {
+    const selectedSchoolId = e.target.value;
+    const selectedSchool = schools.find(s => s._id === selectedSchoolId);
+    setSchoolId(selectedSchoolId);
+    setSchool(selectedSchool ? selectedSchool.name : '');
   };
 
   const handleSubmit = async (e) => {
@@ -70,7 +136,7 @@ const AuthScreen = ({ onLogin }) => {
       const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
       const payload = isLogin 
         ? { username, password } 
-        : { username, password, school };
+        : { username, password, school, grade };
       
       // Add headers to fix CORS issues
       const response = await axios.post(`${API_URL}${endpoint}`, payload, {
@@ -90,7 +156,9 @@ const AuthScreen = ({ onLogin }) => {
         const userData = response.data.user || {
           username: username,
           role: 'student',
-          id: Date.now().toString() // Temporary ID
+          id: Date.now().toString(), // Temporary ID
+          school: school,
+          grade: grade
         };
         
         console.log('Using user data:', userData);
@@ -143,29 +211,53 @@ const AuthScreen = ({ onLogin }) => {
           </div>
           
           {!isLogin && (
-            <div className="form-group">
-              <label htmlFor="school">School</label>
-              {loadingSchools ? (
-                <div className="loading-schools">Loading schools...</div>
-              ) : (
-                <select
-                  id="school"
-                  value={school}
-                  onChange={(e) => setSchool(e.target.value)}
-                  required
-                >
-                  <option value="" disabled>Select your school</option>
-                  {schools.map((schoolItem) => (
-                    <option key={schoolItem._id} value={schoolItem.name}>
-                      {schoolItem.name}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
+            <>
+              <div className="form-group">
+                <label htmlFor="school">School</label>
+                {loadingSchools ? (
+                  <div className="loading-schools">Loading schools...</div>
+                ) : (
+                  <select
+                    id="school"
+                    value={schoolId}
+                    onChange={handleSchoolChange}
+                    required
+                  >
+                    <option value="" disabled>Select your school</option>
+                    {schools.map((schoolItem) => (
+                      <option key={schoolItem._id} value={schoolItem._id}>
+                        {schoolItem.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="grade">Grade</label>
+                {loadingGrades ? (
+                  <div className="loading-grades">Loading grades...</div>
+                ) : (
+                  <select
+                    id="grade"
+                    value={grade}
+                    onChange={(e) => setGrade(e.target.value)}
+                    required
+                    disabled={grades.length === 0}
+                  >
+                    <option value="" disabled>Select your grade</option>
+                    {grades.map((gradeItem, index) => (
+                      <option key={index} value={gradeItem.name}>
+                        {gradeItem.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            </>
           )}
           
-          <button type="submit" disabled={loading || (!isLogin && loadingSchools)}>
+          <button type="submit" disabled={loading || (!isLogin && (loadingSchools || loadingGrades))}>
             {loading ? 'Please wait...' : isLogin ? 'Login' : 'Register'}
           </button>
         </form>
