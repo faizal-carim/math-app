@@ -136,7 +136,7 @@ const AuthScreen = ({ onLogin }) => {
       const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
       const payload = isLogin 
         ? { username, password } 
-        : { username, password, school, grade };
+        : { username, password, schoolId, grade };
       
       // Add headers to fix CORS issues
       const response = await axios.post(`${API_URL}${endpoint}`, payload, {
@@ -156,8 +156,8 @@ const AuthScreen = ({ onLogin }) => {
         const userData = response.data.user || {
           username: username,
           role: 'student',
-          id: Date.now().toString(), // Temporary ID
-          school: school,
+          id: response.data.userId || Date.now().toString(),
+          schoolId: schoolId,
           grade: grade
         };
         
