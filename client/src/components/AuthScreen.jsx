@@ -32,11 +32,24 @@ const AuthScreen = ({ onLogin }) => {
         }
       });
       
-      if (response.data.token) {
+      console.log('API Response:', response);
+      
+      if (response.data && response.data.token) {
+        console.log('Token found, logging in user');
         localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        onLogin(response.data.user);
+        
+        // Create a default user object if user data is missing
+        const userData = response.data.user || {
+          username: username,
+          role: 'student',
+          id: Date.now().toString() // Temporary ID
+        };
+        
+        console.log('Using user data:', userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+        onLogin(userData);
       } else {
+        console.log('No token in response:', response.data);
         setError('Authentication failed. Please try again.');
       }
     } catch (err) {
