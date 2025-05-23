@@ -5,7 +5,7 @@ import './GameScreen.css';
 import { CoinIcon, SkipIcon, CorrectIcon, IncorrectIcon, LogoutIcon } from './Icons';
 import API_URL from '../config';
 
-export default function GameScreen({ onStop, onLogout }) {
+export default function GameScreen({ user, onLogout, onNavigate }) {
   const [questionData, setQuestionData] = useState(null);
   const [userAnswer, setUserAnswer] = useState('');
   const [message, setMessage] = useState('');
@@ -211,7 +211,7 @@ export default function GameScreen({ onStop, onLogout }) {
             <SkipIcon />
             <span>Skip</span>
           </button>
-          <button className="game-button stop-button" onClick={onStop}>
+          <button className="game-button stop-button" onClick={() => onNavigate('profile')}>
             <span>Profile</span>
           </button>
         </div>
