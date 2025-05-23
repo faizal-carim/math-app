@@ -23,7 +23,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 app.use("/api/auth", authRoutes);
 
-app.use("/api/schools", schoolRoutes);
+app.use("/api/school", schoolRoutes);
 
 app.use("/api/game", gameRoutes);
 
