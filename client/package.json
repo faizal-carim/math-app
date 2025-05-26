@@ -5,11 +5,11 @@
     "homepage": "https://faizal-carim.github.io/math-game-app",
     "scripts": {
         "dev": "vite",
-        "build": "react-scripts build",
+        "build": "vite build",
         "preview": "vite preview",
         "predeploy": "npm run build",
         "deploy": "gh-pages -d dist",
-        "start": "react-scripts start",
+        "start": "vite",
         "test": "react-scripts test",
         "eject": "react-scripts eject"
     },
