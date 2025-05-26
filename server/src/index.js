@@ -15,11 +15,14 @@ const adminRoutes = require("./routes/admin");
 
 const app = express();
 app.use(cors({
-  origin: ['https://math-game-client.onrender.com', 'http://localhost:5173'],
+  origin: '*',
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Add OPTIONS handling for preflight requests
+app.options('*', cors());
 app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI)
@@ -40,6 +43,7 @@ app.use("/api/user", userRoutes);
 
 app.use("/api/admin", adminRoutes);
 
-app.listen(3001, () => {
-  console.log("Server running on port 3001");
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
