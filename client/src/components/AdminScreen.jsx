@@ -106,7 +106,7 @@ export default function AdminScreen({ onBack, onLogout }) {
   };
 
   const addGradeField = () => {
-    setGrades([...grades, { name: '' }]);
+    setGrades([...grades, { name: 'Grade 1' }]);
   };
 
   const updateGrade = (index, value) => {
@@ -164,13 +164,18 @@ export default function AdminScreen({ onBack, onLogout }) {
             <label>Grades:</label>
             {grades.map((grade, index) => (
               <div key={index} className="grade-input">
-                <input
-                  type="text"
+                <select
                   value={grade.name}
                   onChange={(e) => updateGrade(index, e.target.value)}
-                  placeholder="Grade name (e.g. Grade 1)"
                   required
-                />
+                >
+                  <option value="" disabled>Select grade</option>
+                  {Array.from({ length: 10 }, (_, i) => (
+                    <option key={i} value={`Grade ${i + 1}`}>
+                      Grade {i + 1}
+                    </option>
+                  ))}
+                </select>
               </div>
             ))}
             <button type="button" className="add-grade-button" onClick={addGradeField}>Add Grade</button>

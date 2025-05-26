@@ -53,7 +53,7 @@ const App = () => {
       case 'admin':
         // Allow access if user is admin OR username is faizal (case insensitive)
         return (user.role === 'admin' || user.username?.toLowerCase() === 'faizal') ? (
-          <AdminScreen onBack={() => setCurrentScreen('profile')} />
+          <AdminScreen onBack={() => setCurrentScreen('profile')} onLogout={handleLogout} />
         ) : (
           <GameScreen 
             user={user} 
@@ -74,7 +74,7 @@ const App = () => {
         return (
           <StoreScreen 
             user={user} 
-            onBack={() => setCurrentScreen('game')}
+            onBack={() => setCurrentScreen('profile')}
           />
         );
       case 'game':
