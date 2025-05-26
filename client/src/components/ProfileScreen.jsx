@@ -71,7 +71,7 @@ const CustomAvatar = ({ name, equipped, size = 120 }) => {
   const theme = useTheme();
   const avatarSize = size * 0.8;
   const itemSize = size * 0.4;
-  const headSize = avatarSize * 0.4; // Reduced head size
+  const headSize = avatarSize * 0.4;
 
   const getItemIcon = (category, isEquipped) => {
     if (!isEquipped) return null;
@@ -79,54 +79,107 @@ const CustomAvatar = ({ name, equipped, size = 120 }) => {
     switch(category) {
       case 'hat':
         return (
-          <Box 
-            component="span"
-            sx={{ 
+          <div
+            style={{ 
               position: 'relative',
               display: 'inline-block',
-              '& svg': {
-                width: headSize * 1.2, // Adjusted to head size
-                height: headSize * 1.2,
-                filter: 'drop-shadow(2px 2px 2px rgba(0,0,0,0.2))'
-              }
+              transform: 'translateY(-50%)'
             }}
           >
-            <HatIcon />
-          </Box>
+            <svg
+              viewBox="0 0 24 24"
+              style={{
+                width: headSize * 1.5,
+                height: headSize * 1.5,
+                filter: 'drop-shadow(2px 2px 2px rgba(0,0,0,0.2))'
+              }}
+            >
+              {/* Hat Base */}
+              <path
+                d="M4 16h16c0-4-4-8-8-8s-8 4-8 8z"
+                fill={theme.palette.primary.main}
+                stroke={theme.palette.primary.dark}
+                strokeWidth="0.5"
+              />
+              {/* Hat Point */}
+              <path
+                d="M12 8l-4 8h8l-4-8z"
+                fill={theme.palette.primary.main}
+                stroke={theme.palette.primary.dark}
+                strokeWidth="0.5"
+              />
+              {/* Hat Brim */}
+              <path
+                d="M2 16h20v2H2z"
+                fill={theme.palette.primary.dark}
+                stroke={theme.palette.primary.dark}
+                strokeWidth="0.5"
+              />
+              {/* Stars/Sparkles */}
+              <circle cx="8" cy="12" r="0.5" fill="white" />
+              <circle cx="16" cy="12" r="0.5" fill="white" />
+              <circle cx="12" cy="10" r="0.5" fill="white" />
+            </svg>
+          </div>
         );
       case 'glasses':
         return (
-          <Box 
-            component="span"
-            sx={{ 
+          <div
+            style={{ 
               position: 'relative',
               display: 'inline-block',
-              '& svg': {
-                width: headSize * 0.9, // Adjusted to head size
+              transform: 'translateY(-5%)'
+            }}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              style={{
+                width: headSize * 1.2,
                 height: headSize * 0.9,
                 filter: 'drop-shadow(1px 1px 1px rgba(0,0,0,0.2))'
-              }
-            }}
-          >
-            <GlassesIcon />
-          </Box>
-        );
-      case 'shirt':
-        return (
-          <Box 
-            component="span"
-            sx={{ 
-              position: 'relative',
-              display: 'inline-block',
-              '& svg': {
-                width: avatarSize * 0.8, // Adjusted to body size
-                height: avatarSize * 0.8,
-                filter: 'drop-shadow(2px 2px 2px rgba(0,0,0,0.2))'
-              }
-            }}
-          >
-            <ShirtIcon />
-          </Box>
+              }}
+            >
+              {/* Left Lens */}
+              <circle
+                cx="8"
+                cy="12"
+                r="3"
+                fill="black"
+                stroke={theme.palette.secondary.main}
+                strokeWidth="1.5"
+              />
+              {/* Right Lens */}
+              <circle
+                cx="16"
+                cy="12"
+                r="3"
+                fill="black"
+                stroke={theme.palette.secondary.main}
+                strokeWidth="1.5"
+              />
+              {/* Bridge */}
+              <path
+                d="M11 12h2"
+                stroke={theme.palette.secondary.main}
+                strokeWidth="1.5"
+                fill="none"
+              />
+              {/* Left Temple */}
+              <path
+                d="M5 12c1-1 2-1 3-1"
+                stroke={theme.palette.secondary.main}
+                strokeWidth="1.5"
+                fill="none"
+              />
+              {/* Right Temple */}
+              <path
+                d="M19 12c-1-1-2-1-3-1"
+                stroke={theme.palette.secondary.main}
+                strokeWidth="1.5"
+                fill="none"
+              />
+            </svg>
+          </div>
         );
       default:
         return null;
@@ -134,44 +187,42 @@ const CustomAvatar = ({ name, equipped, size = 120 }) => {
   };
 
   return (
-    <Box 
-      component="span"
-      sx={{ 
+    <div
+      style={{ 
         position: 'relative',
         width: size,
         height: size,
         display: 'inline-block',
-        lineHeight: 0
+        lineHeight: 0,
+        overflow: 'visible'
       }}
     >
       {/* Avatar Container */}
-      <Box 
-        component="span"
-        sx={{
+      <div
+        style={{
           position: 'relative',
           width: avatarSize,
           height: avatarSize,
           display: 'inline-block',
-          lineHeight: 0
+          lineHeight: 0,
+          overflow: 'visible'
         }}
       >
         {/* Head with Ears */}
-        <Box 
-          component="span"
-          sx={{
+        <div
+          style={{
             position: 'relative',
             width: headSize,
             height: headSize,
-            zIndex: 2,
+            zIndex: 3,
             left: '50%',
             transform: 'translateX(-50%)',
             top: avatarSize * 0.1
           }}
         >
           {/* Ears */}
-          <Box 
-            component="span"
-            sx={{
+          <div
+            style={{
               position: 'absolute',
               width: '100%',
               height: '100%',
@@ -179,73 +230,68 @@ const CustomAvatar = ({ name, equipped, size = 120 }) => {
             }}
           >
             {/* Left Ear */}
-            <Box 
-              component="span"
-              sx={{
+            <div
+              style={{
                 position: 'absolute',
                 left: -headSize * 0.2,
                 top: headSize * 0.3,
                 width: headSize * 0.3,
                 height: headSize * 0.4,
                 borderRadius: '50%',
-                bgcolor: '#FFD3B6',
+                backgroundColor: '#FFD3B6',
                 border: '3px solid',
                 borderColor: theme.palette.background.paper,
-                boxShadow: 2,
+                boxShadow: theme.shadows[2],
                 transform: 'rotate(-15deg)'
               }} 
             />
             {/* Right Ear */}
-            <Box 
-              component="span"
-              sx={{
+            <div
+              style={{
                 position: 'absolute',
                 right: -headSize * 0.2,
                 top: headSize * 0.3,
                 width: headSize * 0.3,
                 height: headSize * 0.4,
                 borderRadius: '50%',
-                bgcolor: '#FFD3B6',
+                backgroundColor: '#FFD3B6',
                 border: '3px solid',
                 borderColor: theme.palette.background.paper,
-                boxShadow: 2,
+                boxShadow: theme.shadows[2],
                 transform: 'rotate(15deg)'
               }} 
             />
-          </Box>
+          </div>
 
           {/* Face */}
-          <Box 
-            component="span"
-            sx={{
+          <div
+            style={{
               width: '100%',
               height: '100%',
               borderRadius: '50%',
-              bgcolor: '#FFD3B6',
+              backgroundColor: '#FFD3B6',
               display: 'inline-block',
               position: 'relative',
               border: '3px solid',
               borderColor: theme.palette.background.paper,
-              boxShadow: 3,
+              boxShadow: theme.shadows[3],
               overflow: 'hidden',
               zIndex: 2
             }}
           >
             {/* Face Features */}
-            <Box 
-              component="span"
-              sx={{
+            <div
+              style={{
                 position: 'relative',
                 width: '100%',
                 height: '100%',
                 display: 'inline-block',
-                pt: headSize * 0.05
+                paddingTop: headSize * 0.05
               }}
             >
               {/* Eyes */}
-              <Box 
-                component="span"
-                sx={{
+              <div
+                style={{
                   position: 'absolute',
                   width: '100%',
                   top: headSize * 0.35,
@@ -255,15 +301,17 @@ const CustomAvatar = ({ name, equipped, size = 120 }) => {
                 }}
               >
                 {/* Left Eye */}
-                <Box 
-                  component="span"
-                  sx={{
+                <div
+                  style={{
                     width: headSize * 0.08,
                     height: headSize * 0.08,
                     borderRadius: '50%',
-                    bgcolor: theme.palette.primary.dark,
-                    position: 'relative',
-                    '&::after': {
+                    backgroundColor: theme.palette.primary.dark,
+                    position: 'relative'
+                  }} 
+                >
+                  <div
+                    style={{
                       content: '""',
                       position: 'absolute',
                       top: '20%',
@@ -271,20 +319,22 @@ const CustomAvatar = ({ name, equipped, size = 120 }) => {
                       width: '30%',
                       height: '30%',
                       borderRadius: '50%',
-                      bgcolor: 'white'
-                    }
-                  }} 
-                />
+                      backgroundColor: 'white'
+                    }}
+                  />
+                </div>
                 {/* Right Eye */}
-                <Box 
-                  component="span"
-                  sx={{
+                <div
+                  style={{
                     width: headSize * 0.08,
                     height: headSize * 0.08,
                     borderRadius: '50%',
-                    bgcolor: theme.palette.primary.dark,
-                    position: 'relative',
-                    '&::after': {
+                    backgroundColor: theme.palette.primary.dark,
+                    position: 'relative'
+                  }} 
+                >
+                  <div
+                    style={{
                       content: '""',
                       position: 'absolute',
                       top: '20%',
@@ -292,15 +342,14 @@ const CustomAvatar = ({ name, equipped, size = 120 }) => {
                       width: '30%',
                       height: '30%',
                       borderRadius: '50%',
-                      bgcolor: 'white'
-                    }
-                  }} 
-                />
-              </Box>
+                      backgroundColor: 'white'
+                    }}
+                  />
+                </div>
+              </div>
               {/* Smile */}
-              <Box 
-                component="span"
-                sx={{
+              <div
+                style={{
                   position: 'absolute',
                   width: headSize * 0.2,
                   height: headSize * 0.1,
@@ -312,18 +361,17 @@ const CustomAvatar = ({ name, equipped, size = 120 }) => {
                   transform: 'translateX(-50%)'
                 }} 
               />
-            </Box>
-          </Box>
-        </Box>
+            </div>
+          </div>
+        </div>
 
         {/* Neck */}
-        <Box 
-          component="span"
-          sx={{
+        <div
+          style={{
             position: 'absolute',
             width: headSize * 0.4,
             height: headSize * 0.3,
-            bgcolor: '#FFD3B6',
+            backgroundColor: '#FFD3B6',
             borderRadius: '0 0 10px 10px',
             top: headSize * 0.9,
             left: '50%',
@@ -332,81 +380,62 @@ const CustomAvatar = ({ name, equipped, size = 120 }) => {
             border: '3px solid',
             borderColor: theme.palette.background.paper,
             borderTop: 'none',
-            boxShadow: 2
+            boxShadow: theme.shadows[2]
           }} 
         />
 
         {/* Body */}
-        <Box 
-          component="span"
-          sx={{
+        <div
+          style={{
             position: 'absolute',
             width: avatarSize * 0.7,
             height: avatarSize * 0.6,
-            bgcolor: theme.palette.primary.main,
+            backgroundColor: equipped?.shirt ? theme.palette.success.main : '#FFD3B6',
             borderRadius: '30px 30px 0 0',
             top: headSize * 1.1,
             left: '50%',
             transform: 'translateX(-50%)',
             border: '3px solid',
             borderColor: theme.palette.background.paper,
-            boxShadow: 3,
-            zIndex: 1
+            boxShadow: theme.shadows[3],
+            zIndex: 1,
+            transition: 'background-color 0.3s ease'
           }} 
         />
 
         {/* Hat */}
         {equipped?.hat && (
-          <Box 
-            component="span"
-            sx={{
+          <div
+            style={{
               position: 'absolute',
-              top: headSize * 0.1,
+              top: headSize * 0.05,
               left: '50%',
               transform: 'translateX(-50%)',
-              zIndex: 3,
+              zIndex: 4,
               color: theme.palette.primary.main
             }}
           >
             {getItemIcon('hat', true)}
-          </Box>
+          </div>
         )}
 
         {/* Glasses */}
         {equipped?.glasses && (
-          <Box 
-            component="span"
-            sx={{
+          <div
+            style={{
               position: 'absolute',
-              top: headSize * 0.35,
+              top: headSize * 0.7,
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              zIndex: 3,
+              zIndex: 4,
               color: theme.palette.secondary.main
             }}
           >
             {getItemIcon('glasses', true)}
-          </Box>
+          </div>
         )}
-
-        {/* Shirt/Cape */}
-        {equipped?.shirt && (
-          <Box 
-            component="span"
-            sx={{
-              position: 'absolute',
-              top: headSize * 1.1,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              zIndex: 2,
-              color: theme.palette.success.main
-            }}
-          >
-            {getItemIcon('shirt', true)}
-          </Box>
-        )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };
 
@@ -553,244 +582,238 @@ export default function ProfileScreen({ user, onBack, onLogout, onNavigate }) {
       initial={{ scale: 0.9, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ duration: 0.3 }}
+      style={{ 
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        width: '100%'
+      }}
     >
-      <Paper 
-        sx={{ 
-          p: 3, 
-          textAlign: 'center', 
-          borderRadius: 3,
-          bgcolor: 'transparent',
-          boxShadow: 'none'
+      <div
+        style={{ 
+          display: 'inline-block',
+          marginBottom: 24,
         }}
       >
-        <Box 
-          component="span"
-          sx={{ 
-            display: 'inline-block',
-            mb: 3,
-            bgcolor: 'transparent'
-          }}
-        >
-          <CustomAvatar 
-            name={name} 
-            equipped={avatar?.equipped}
-            size={160}
-          />
-        </Box>
-        <Typography variant="h6" gutterBottom>Your Avatar</Typography>
-        
-        {/* Currently Equipped Items */}
-        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-          Currently Equipped
-        </Typography>
-        <Grid container spacing={2} sx={{ mt: 1 }}>
-          {avatar?.equipped?.hat && (
-            <Grid item xs={4}>
+        <CustomAvatar 
+          name={name} 
+          equipped={avatar?.equipped}
+          size={160}
+        />
+      </div>
+      <Typography variant="h6" gutterBottom align="center">Your Avatar</Typography>
+      
+      {/* Currently Equipped Items */}
+      <Typography variant="subtitle2" color="text.secondary" gutterBottom align="center">
+        Currently Equipped
+      </Typography>
+      <Grid container spacing={2} sx={{ mt: 1, justifyContent: 'center' }}>
+        {avatar?.equipped?.hat && (
+          <Grid item xs={4}>
+            <Paper 
+              sx={{ 
+                p: 1, 
+                textAlign: 'center',
+                bgcolor: 'background.paper'
+              }}
+            >
+              <Box 
+                component="span"
+                sx={{ 
+                  color: 'primary.main',
+                  '& svg': {
+                    width: 40,
+                    height: 40
+                  }
+                }}
+              >
+                <HatIcon />
+              </Box>
+              <Typography variant="body2">
+                Wizard Hat
+              </Typography>
+            </Paper>
+          </Grid>
+        )}
+        {avatar?.equipped?.glasses && (
+          <Grid item xs={4}>
+            <Paper 
+              sx={{ 
+                p: 1, 
+                textAlign: 'center',
+                bgcolor: 'background.paper'
+              }}
+            >
+              <Box 
+                component="span"
+                sx={{ 
+                  color: 'secondary.main',
+                  '& svg': {
+                    width: 40,
+                    height: 40
+                  }
+                }}
+              >
+                <GlassesIcon />
+              </Box>
+              <Typography variant="body2">
+                Cool Glasses
+              </Typography>
+            </Paper>
+          </Grid>
+        )}
+        {avatar?.equipped?.shirt && (
+          <Grid item xs={4}>
+            <Paper 
+              sx={{ 
+                p: 1, 
+                textAlign: 'center',
+                bgcolor: 'background.paper'
+              }}
+            >
+              <Box 
+                component="span"
+                sx={{ 
+                  color: 'success.main',
+                  '& svg': {
+                    width: 40,
+                    height: 40
+                  }
+                }}
+              >
+                <ShirtIcon />
+              </Box>
+              <Typography variant="body2">
+                Cape
+              </Typography>
+            </Paper>
+          </Grid>
+        )}
+        {!avatar?.equipped?.hat && !avatar?.equipped?.glasses && !avatar?.equipped?.shirt && (
+          <Grid item xs={12}>
+            <Typography variant="body2" color="text.secondary" align="center">
+              No items equipped
+            </Typography>
+          </Grid>
+        )}
+      </Grid>
+
+      {/* Owned Items */}
+      <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 3, mb: 1 }}>
+        Your Collection
+      </Typography>
+      <Grid container spacing={2}>
+        {avatar?.ownedItems?.length > 0 ? (
+          avatar.ownedItems.map((item) => (
+            <Grid item xs={4} key={item._id || item}>
               <Paper 
                 sx={{ 
                   p: 1, 
                   textAlign: 'center',
-                  bgcolor: 'background.paper'
+                  bgcolor: avatar?.equipped?.hat === item._id || 
+                          avatar?.equipped?.glasses === item._id || 
+                          avatar?.equipped?.shirt === item._id 
+                    ? 'primary.light' 
+                    : 'background.paper'
                 }}
               >
-                <Box 
-                  component="span"
-                  sx={{ 
+                {item.category === 'hat' && (
+                  <Box sx={{ 
                     color: 'primary.main',
                     '& svg': {
                       width: 40,
                       height: 40
                     }
-                  }}
-                >
-                  <HatIcon />
-                </Box>
-                <Typography variant="body2">
-                  Wizard Hat
-                </Typography>
-              </Paper>
-            </Grid>
-          )}
-          {avatar?.equipped?.glasses && (
-            <Grid item xs={4}>
-              <Paper 
-                sx={{ 
-                  p: 1, 
-                  textAlign: 'center',
-                  bgcolor: 'background.paper'
-                }}
-              >
-                <Box 
-                  component="span"
-                  sx={{ 
+                  }}>
+                    <HatIcon />
+                  </Box>
+                )}
+                {item.category === 'glasses' && (
+                  <Box sx={{ 
                     color: 'secondary.main',
                     '& svg': {
                       width: 40,
                       height: 40
                     }
-                  }}
-                >
-                  <GlassesIcon />
-                </Box>
-                <Typography variant="body2">
-                  Cool Glasses
-                </Typography>
-              </Paper>
-            </Grid>
-          )}
-          {avatar?.equipped?.shirt && (
-            <Grid item xs={4}>
-              <Paper 
-                sx={{ 
-                  p: 1, 
-                  textAlign: 'center',
-                  bgcolor: 'background.paper'
-                }}
-              >
-                <Box 
-                  component="span"
-                  sx={{ 
+                  }}>
+                    <GlassesIcon />
+                  </Box>
+                )}
+                {item.category === 'shirt' && (
+                  <Box sx={{ 
                     color: 'success.main',
                     '& svg': {
                       width: 40,
                       height: 40
                     }
-                  }}
-                >
-                  <ShirtIcon />
-                </Box>
-                <Typography variant="body2">
-                  Cape
+                  }}>
+                    <ShirtIcon />
+                  </Box>
+                )}
+                <Typography variant="body2" sx={{ mt: 0.5 }}>
+                  {item.name || (item.category === 'hat' ? 'Wizard Hat' : 
+                               item.category === 'glasses' ? 'Cool Glasses' : 'Cape')}
                 </Typography>
+                <Box sx={{ mt: 1 }}>
+                  {avatar?.equipped?.hat === item._id || 
+                   avatar?.equipped?.glasses === item._id || 
+                   avatar?.equipped?.shirt === item._id ? (
+                    <Chip
+                      size="small"
+                      label="Equipped"
+                      color="primary"
+                    />
+                  ) : (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={() => handleEquip(item._id || item)}
+                      sx={{ mt: 0.5 }}
+                    >
+                      Equip
+                    </Button>
+                  )}
+                </Box>
               </Paper>
             </Grid>
-          )}
-          {!avatar?.equipped?.hat && !avatar?.equipped?.glasses && !avatar?.equipped?.shirt && (
-            <Grid item xs={12}>
-              <Typography variant="body2" color="text.secondary" align="center">
-                No items equipped
-              </Typography>
-            </Grid>
-          )}
-        </Grid>
-
-        {/* Owned Items */}
-        <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 3, mb: 1 }}>
-          Your Collection
-        </Typography>
-        <Grid container spacing={2}>
-          {avatar?.ownedItems?.length > 0 ? (
-            avatar.ownedItems.map((item) => (
-              <Grid item xs={4} key={item._id || item}>
-                <Paper 
-                  sx={{ 
-                    p: 1, 
-                    textAlign: 'center',
-                    bgcolor: avatar?.equipped?.hat === item._id || 
-                            avatar?.equipped?.glasses === item._id || 
-                            avatar?.equipped?.shirt === item._id 
-                      ? 'primary.light' 
-                      : 'background.paper'
-                  }}
-                >
-                  {item.category === 'hat' && (
-                    <Box sx={{ 
-                      color: 'primary.main',
-                      '& svg': {
-                        width: 40,
-                        height: 40
-                      }
-                    }}>
-                      <HatIcon />
-                    </Box>
-                  )}
-                  {item.category === 'glasses' && (
-                    <Box sx={{ 
-                      color: 'secondary.main',
-                      '& svg': {
-                        width: 40,
-                        height: 40
-                      }
-                    }}>
-                      <GlassesIcon />
-                    </Box>
-                  )}
-                  {item.category === 'shirt' && (
-                    <Box sx={{ 
-                      color: 'success.main',
-                      '& svg': {
-                        width: 40,
-                        height: 40
-                      }
-                    }}>
-                      <ShirtIcon />
-                    </Box>
-                  )}
-                  <Typography variant="body2" sx={{ mt: 0.5 }}>
-                    {item.name || (item.category === 'hat' ? 'Wizard Hat' : 
-                                 item.category === 'glasses' ? 'Cool Glasses' : 'Cape')}
-                  </Typography>
-                  <Box sx={{ mt: 1 }}>
-                    {avatar?.equipped?.hat === item._id || 
-                     avatar?.equipped?.glasses === item._id || 
-                     avatar?.equipped?.shirt === item._id ? (
-                      <Chip
-                        size="small"
-                        label="Equipped"
-                        color="primary"
-                      />
-                    ) : (
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={() => handleEquip(item._id || item)}
-                        sx={{ mt: 0.5 }}
-                      >
-                        Equip
-                      </Button>
-                    )}
-                  </Box>
-                </Paper>
-              </Grid>
-            ))
-          ) : (
-            <Grid item xs={12}>
-              <Typography variant="body2" color="text.secondary" align="center">
-                No items owned yet
-              </Typography>
-            </Grid>
-          )}
-        </Grid>
-
-        {message && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Paper 
-              sx={{ 
-                p: 2, 
-                mt: 2,
-                textAlign: 'center',
-                bgcolor: 'success.light',
-                color: 'success.contrastText'
-              }}
-            >
-              <Typography>{message}</Typography>
-            </Paper>
-          </motion.div>
+          ))
+        ) : (
+          <Grid item xs={12}>
+            <Typography variant="body2" color="text.secondary" align="center">
+              No items owned yet
+            </Typography>
+          </Grid>
         )}
+      </Grid>
 
-        <Button
-          variant="contained"
-          startIcon={<StoreIcon />}
-          onClick={() => onNavigate('store')}
-          sx={{ mt: 3 }}
+      {message && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
         >
-          Visit Store
-        </Button>
-      </Paper>
+          <Paper 
+            sx={{ 
+              p: 2, 
+              mt: 2,
+              textAlign: 'center',
+              bgcolor: 'success.light',
+              color: 'success.contrastText'
+            }}
+          >
+            <Typography>{message}</Typography>
+          </Paper>
+        </motion.div>
+      )}
+
+      <Button
+        variant="contained"
+        startIcon={<StoreIcon />}
+        onClick={() => onNavigate('store')}
+        sx={{ mt: 3 }}
+      >
+        Visit Store
+      </Button>
     </motion.div>
   );
 
