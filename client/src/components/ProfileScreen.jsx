@@ -1,266 +1,383 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import './ProfileScreen.css';
-import { 
-  CoinIcon, 
-  PlayIcon, 
-  StoreIcon, 
-  TrophyIcon, 
-  SchoolIcon, 
-  TimerIcon,
-  AvatarIcon,
-  HatIcon,
-  GlassesIcon,
-  ShirtIcon,
-  LogoutIcon,
-  AdminIcon
-} from './Icons';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Box,
+  Container,
+  Paper,
+  Typography,
+  Button,
+  Grid,
+  Tab,
+  Tabs,
+  Card,
+  CardContent,
+  Avatar,
+  IconButton,
+  useTheme,
+  useMediaQuery,
+  Divider,
+  CircularProgress
+} from '@mui/material';
+import {
+  MonetizationOn as CoinIcon,
+  PlayArrow as PlayIcon,
+  Store as StoreIcon,
+  EmojiEvents as TrophyIcon,
+  School as SchoolIcon,
+  Timer as TimerIcon,
+  Person as AvatarIcon,
+  SportsEsports as GameIcon,
+  AdminPanelSettings as AdminIcon,
+  Logout as LogoutIcon,
+  CheckCircle as CorrectIcon,
+  Speed as SpeedIcon,
+  Percent as PercentIcon,
+  QuestionAnswer as QuestionIcon
+} from '@mui/icons-material';
 import API_URL from '../config';
 
+const TabPanel = ({ children, value, index, ...other }) => (
+  <div
+    role="tabpanel"
+    hidden={value !== index}
+    {...other}
+  >
+    {value === index && (
+      <Box sx={{ py: 3 }}>
+        {children}
+      </Box>
+    )}
+  </div>
+);
+
 export default function ProfileScreen({ user, onBack, onLogout, onNavigate }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [profile, setProfile] = useState(null);
   const [globalLeaderboard, setGlobalLeaderboard] = useState([]);
   const [schoolLeaderboard, setSchoolLeaderboard] = useState([]);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('stats');
+  const [activeTab, setActiveTab] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const token = localStorage.getItem("token");
 
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch profile first
+        setLoading(true);
         const res = await axios.get(`${API_URL}/api/user/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const userProfile = res.data;
         setProfile(userProfile);
-  
+
         const { grade, schoolId } = userProfile;
-  
-        // Fetch global leaderboard filtered by grade
-        const globalRes = await axios.get(`${API_URL}/api/leaderboard/global?grade=${grade}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+
+        const [globalRes, schoolRes] = await Promise.all([
+          axios.get(`${API_URL}/api/leaderboard/global?grade=${grade}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get(`${API_URL}/api/leaderboard/school?schoolId=${schoolId}&grade=${grade}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+        ]);
+
         setGlobalLeaderboard(globalRes.data);
-  
-        // Fetch school leaderboard filtered by school and grade
-        const schoolRes = await axios.get(`${API_URL}/api/leaderboard/school?schoolId=${schoolId}&grade=${grade}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
         setSchoolLeaderboard(schoolRes.data);
-  
       } catch (err) {
         console.error(err);
         setError("Failed to load profile or leaderboard.");
+      } finally {
+        setLoading(false);
       }
     }
-  
+
     fetchData();
   }, [token]);
 
-  // Check if user is faizal (case insensitive)
   const isFaizalUser = profile?.name && profile.name.toLowerCase() === "faizal";
 
-  if (error) return <div className="error-message">{error}</div>;
-  if (!profile) return <div className="loading">Loading profile...</div>;
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Paper sx={{ p: 3, textAlign: 'center', color: 'error.main' }}>
+          <Typography variant="h6">{error}</Typography>
+        </Paper>
+      </Container>
+    );
+  }
+
+  if (!profile) return null;
 
   const { name, grade, currency, gameStats, avatar } = profile;
 
-  // Helper to render leaderboard table
-  const renderLeaderboard = (data, title, icon) => (
-    <div className="leaderboard-section card">
-      <div className="leaderboard-header">
-        {icon}
-        <h3>{title}</h3>
-      </div>
-      <div className="leaderboard-table-container">
-        <table className="leaderboard-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>User</th>
-              <th>
-                <div className="icon-text">
-                  <TrophyIcon />
-                </div>
-              </th>
-              <th>%</th>
-              <th>
-                <div className="icon-text">
-                  <TimerIcon />
-                </div>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((entry, index) => (
-              <tr key={entry.username}
-                className={entry.username === name ? "highlight-row" : ""}>
-                <td>{index + 1}</td>
-                <td>{entry.username}</td>
-                <td>{entry.totalCorrect}</td>
-                <td>{entry.accuracy}%</td>
-                <td>{entry.averageTime}s</td>
+  const renderLeaderboard = (data, title) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Paper sx={{ p: 3, borderRadius: 3 }}>
+        <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {title === "Global Leaderboard" ? <TrophyIcon color="primary" /> : <SchoolIcon color="primary" />}
+          {title}
+        </Typography>
+        <Box sx={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                <th style={{ padding: '12px', textAlign: 'left' }}>#</th>
+                <th style={{ padding: '12px', textAlign: 'left' }}>User</th>
+                <th style={{ padding: '12px', textAlign: 'center' }}><CorrectIcon /></th>
+                <th style={{ padding: '12px', textAlign: 'center' }}>%</th>
+                <th style={{ padding: '12px', textAlign: 'center' }}><TimerIcon /></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+            </thead>
+            <tbody>
+              {data.map((entry, index) => (
+                <motion.tr
+                  key={entry.username}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: index * 0.1 }}
+                  style={{
+                    backgroundColor: entry.username === name ? theme.palette.primary.light + '20' : 'transparent',
+                    borderRadius: '4px'
+                  }}
+                >
+                  <td style={{ padding: '12px' }}>{index + 1}</td>
+                  <td style={{ padding: '12px' }}>{entry.username}</td>
+                  <td style={{ padding: '12px', textAlign: 'center' }}>{entry.totalCorrect}</td>
+                  <td style={{ padding: '12px', textAlign: 'center' }}>{entry.accuracy}%</td>
+                  <td style={{ padding: '12px', textAlign: 'center' }}>{entry.averageTime}s</td>
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
+        </Box>
+      </Paper>
+    </motion.div>
   );
 
-  // Avatar preview
   const renderAvatarPreview = () => (
-    <div className="avatar-preview">
-      <div className="avatar-figure">
-        {avatar?.equipped?.hat && (
-          <div className="avatar-hat">
-            <HatIcon />
-          </div>
-        )}
-        <div className="avatar-head">😊</div>
-        {avatar?.equipped?.glasses && (
-          <div className="avatar-glasses">
-            <GlassesIcon />
-          </div>
-        )}
-        {avatar?.equipped?.shirt && (
-          <div className="avatar-shirt">
-            <ShirtIcon />
-          </div>
-        )}
-      </div>
-    </div>
+    <motion.div
+      initial={{ scale: 0.9, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 3 }}>
+        <Box sx={{ 
+          width: 120, 
+          height: 120, 
+          mx: 'auto', 
+          mb: 2,
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <Avatar
+            sx={{
+              width: 100,
+              height: 100,
+              bgcolor: theme.palette.primary.main,
+              fontSize: '2rem'
+            }}
+          >
+            {name.charAt(0).toUpperCase()}
+          </Avatar>
+          {avatar?.equipped?.hat && (
+            <Box sx={{ position: 'absolute', top: -20 }}>
+              <GameIcon color="primary" sx={{ fontSize: 40 }} />
+            </Box>
+          )}
+          {avatar?.equipped?.glasses && (
+            <Box sx={{ position: 'absolute', top: 20 }}>
+              <GameIcon color="secondary" sx={{ fontSize: 30 }} />
+            </Box>
+          )}
+        </Box>
+        <Typography variant="h6" gutterBottom>Your Avatar</Typography>
+        <Grid container spacing={2} sx={{ mt: 2 }}>
+          <Grid item xs={4}>
+            <Paper sx={{ p: 1, textAlign: 'center' }}>
+              <GameIcon color="primary" />
+              <Typography variant="body2">{avatar?.equipped?.hat || "No Hat"}</Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={4}>
+            <Paper sx={{ p: 1, textAlign: 'center' }}>
+              <GameIcon color="secondary" />
+              <Typography variant="body2">{avatar?.equipped?.glasses || "No Glasses"}</Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={4}>
+            <Paper sx={{ p: 1, textAlign: 'center' }}>
+              <GameIcon color="success" />
+              <Typography variant="body2">{avatar?.equipped?.shirt || "No Shirt"}</Typography>
+            </Paper>
+          </Grid>
+        </Grid>
+        <Button
+          variant="contained"
+          startIcon={<StoreIcon />}
+          onClick={() => onNavigate('store')}
+          sx={{ mt: 3 }}
+        >
+          Visit Store
+        </Button>
+      </Paper>
+    </motion.div>
   );
 
   return (
-    <div className="profile-container">
-      <div className="profile-header">
-        <div className="profile-title">
-          <h2>{name}</h2>
-          <div className="profile-subtitle">
-            <span className="grade-badge">{grade}</span>
-            <div className="currency-display">
-              <CoinIcon />
-              <span>{currency}</span>
-            </div>
-          </div>
-        </div>
-        <div className="profile-actions">
-          {(user?.role === 'admin' || isFaizalUser) && (
-            <button className="profile-button admin-button icon-button" onClick={() => onNavigate('admin')}>
-              <AdminIcon />
-              <span>Admin</span>
-            </button>
-          )}
-          <button className="profile-button logout-button icon-button" onClick={onLogout}>
-            <LogoutIcon />
-            <span>Logout</span>
-          </button>
-          <button className="profile-button store-button icon-button" onClick={() => onNavigate('store')}>
-            <StoreIcon />
-            <span>Store</span>
-          </button>
-          <button className="profile-button play-button icon-button" onClick={() => onNavigate('game')}>
-            <PlayIcon />
-            <span>Play</span>
-          </button>
-        </div>
-      </div>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Paper 
+          elevation={3} 
+          sx={{ 
+            p: 3, 
+            borderRadius: 4,
+            background: 'linear-gradient(145deg, #ffffff 0%, #f5f5f5 100%)'
+          }}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Box>
+              <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
+                {name}
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
+                <Paper 
+                  elevation={1} 
+                  sx={{ 
+                    px: 2, 
+                    py: 0.5, 
+                    borderRadius: 2,
+                    bgcolor: 'primary.main',
+                    color: 'white'
+                  }}
+                >
+                  <Typography variant="subtitle1">{grade}</Typography>
+                </Paper>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <CoinIcon color="primary" />
+                  <Typography variant="h6">{currency}</Typography>
+                </Box>
+              </Box>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              {(user?.role === 'admin' || isFaizalUser) && (
+                <Button
+                  variant="outlined"
+                  startIcon={<AdminIcon />}
+                  onClick={() => onNavigate('admin')}
+                >
+                  Admin
+                </Button>
+              )}
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<PlayIcon />}
+                onClick={() => onNavigate('game')}
+              >
+                Play
+              </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                startIcon={<LogoutIcon />}
+                onClick={onLogout}
+              >
+                Logout
+              </Button>
+            </Box>
+          </Box>
 
-      <div className="profile-tabs">
-        <button 
-          className={`tab-button ${activeTab === 'stats' ? 'active' : ''}`}
-          onClick={() => setActiveTab('stats')}
-        >
-          <TrophyIcon />
-          <span>Stats</span>
-        </button>
-        <button 
-          className={`tab-button ${activeTab === 'avatar' ? 'active' : ''}`}
-          onClick={() => setActiveTab('avatar')}
-        >
-          <AvatarIcon />
-          <span>Avatar</span>
-        </button>
-        <button 
-          className={`tab-button ${activeTab === 'global' ? 'active' : ''}`}
-          onClick={() => setActiveTab('global')}
-        >
-          <TrophyIcon />
-          <span>Global</span>
-        </button>
-        <button 
-          className={`tab-button ${activeTab === 'school' ? 'active' : ''}`}
-          onClick={() => setActiveTab('school')}
-        >
-          <SchoolIcon />
-          <span>School</span>
-        </button>
-      </div>
+          <Tabs
+            value={activeTab}
+            onChange={(e, newValue) => setActiveTab(newValue)}
+            variant={isMobile ? "fullWidth" : "standard"}
+            sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
+          >
+            <Tab icon={<TrophyIcon />} label="Stats" />
+            <Tab icon={<AvatarIcon />} label="Avatar" />
+            <Tab icon={<TrophyIcon />} label="Global" />
+            <Tab icon={<SchoolIcon />} label="School" />
+          </Tabs>
 
-      <div className="profile-content">
-        {activeTab === 'stats' && (
-          <div className="stats-section card">
-            <h3>Game Stats</h3>
-            <div className="stats-grid">
-              <div className="stat-card">
-                <div className="stat-icon">🎯</div>
-                <div className="stat-value">{gameStats.totalQuestions}</div>
-                <div className="stat-label">Questions</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-icon">✅</div>
-                <div className="stat-value">{gameStats.totalCorrect}</div>
-                <div className="stat-label">Correct</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-icon">⏱️</div>
-                <div className="stat-value">{gameStats.averageTime.toFixed(1)}s</div>
-                <div className="stat-label">Avg Time</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-icon">%</div>
-                <div className="stat-value">
-                  {gameStats.totalQuestions > 0 
-                    ? Math.round((gameStats.totalCorrect / gameStats.totalQuestions) * 100) 
-                    : 0}%
-                </div>
-                <div className="stat-label">Accuracy</div>
-              </div>
-            </div>
-          </div>
-        )}
+          <TabPanel value={activeTab} index={0}>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent sx={{ textAlign: 'center' }}>
+                    <QuestionIcon color="primary" sx={{ fontSize: 40 }} />
+                    <Typography variant="h4" sx={{ my: 1 }}>{gameStats.totalQuestions}</Typography>
+                    <Typography color="text.secondary">Questions</Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent sx={{ textAlign: 'center' }}>
+                    <CorrectIcon color="success" sx={{ fontSize: 40 }} />
+                    <Typography variant="h4" sx={{ my: 1 }}>{gameStats.totalCorrect}</Typography>
+                    <Typography color="text.secondary">Correct</Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent sx={{ textAlign: 'center' }}>
+                    <SpeedIcon color="info" sx={{ fontSize: 40 }} />
+                    <Typography variant="h4" sx={{ my: 1 }}>{gameStats.averageTime.toFixed(1)}s</Typography>
+                    <Typography color="text.secondary">Avg Time</Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent sx={{ textAlign: 'center' }}>
+                    <PercentIcon color="secondary" sx={{ fontSize: 40 }} />
+                    <Typography variant="h4" sx={{ my: 1 }}>
+                      {gameStats.totalQuestions > 0 
+                        ? Math.round((gameStats.totalCorrect / gameStats.totalQuestions) * 100) 
+                        : 0}%
+                    </Typography>
+                    <Typography color="text.secondary">Accuracy</Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </TabPanel>
 
-        {activeTab === 'avatar' && (
-          <div className="avatar-section card">
-            <h3>Your Avatar</h3>
+          <TabPanel value={activeTab} index={1}>
             {renderAvatarPreview()}
-            <div className="avatar-items">
-              <div className="avatar-item">
-                <HatIcon />
-                <span>{avatar?.equipped?.hat || "None"}</span>
-              </div>
-              <div className="avatar-item">
-                <GlassesIcon />
-                <span>{avatar?.equipped?.glasses || "None"}</span>
-              </div>
-              <div className="avatar-item">
-                <ShirtIcon />
-                <span>{avatar?.equipped?.shirt || "None"}</span>
-              </div>
-            </div>
-            <button className="store-button icon-button" onClick={() => onNavigate('store')}>
-              <StoreIcon />
-              <span>Go to Store</span>
-            </button>
-          </div>
-        )}
+          </TabPanel>
 
-        {activeTab === 'global' && renderLeaderboard(globalLeaderboard, "Global Leaderboard", <TrophyIcon />)}
-        {activeTab === 'school' && renderLeaderboard(schoolLeaderboard, "School Leaderboard", <SchoolIcon />)}
-      </div>
-    </div>
+          <TabPanel value={activeTab} index={2}>
+            {renderLeaderboard(globalLeaderboard, "Global Leaderboard")}
+          </TabPanel>
+
+          <TabPanel value={activeTab} index={3}>
+            {renderLeaderboard(schoolLeaderboard, "School Leaderboard")}
+          </TabPanel>
+        </Paper>
+      </motion.div>
+    </Container>
   );
 }

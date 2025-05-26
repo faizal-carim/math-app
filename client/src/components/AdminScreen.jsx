@@ -1,16 +1,63 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './AdminScreen.css';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Box,
+  Container,
+  Paper,
+  Typography,
+  Button,
+  Grid,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  useTheme,
+  useMediaQuery,
+  CircularProgress,
+  Chip,
+  Alert,
+  Stack
+} from '@mui/material';
+import {
+  School as SchoolIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Refresh as RefreshIcon,
+  ArrowBack as BackIcon,
+  Logout as LogoutIcon,
+  Warning as WarningIcon,
+  CheckCircle as CheckIcon
+} from '@mui/icons-material';
+import { DatePicker } from '@mui/x-date-pickers';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import API_URL from '../config';
 
 export default function AdminScreen({ onBack, onLogout }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [schools, setSchools] = useState([]);
-  const [newSchool, setNewSchool] = useState({ name: '', licenseExpiry: '' });
+  const [newSchool, setNewSchool] = useState({ name: '', licenseExpiry: new Date() });
   const [selectedSchool, setSelectedSchool] = useState(null);
   const [message, setMessage] = useState('');
   const [grades, setGrades] = useState([{ name: 'Grade 1' }]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
 
   const token = localStorage.getItem('token');
 
@@ -22,23 +69,18 @@ export default function AdminScreen({ onBack, onLogout }) {
     setLoading(true);
     setError(null);
     try {
-      // Log the request for debugging
-      console.log('Fetching schools with token:', token);
-      
       const res = await axios.get(`${API_URL}/api/admin/schools`, {
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
-      console.log('Schools response:', res.data);
       setSchools(res.data);
-      setLoading(false);
     } catch (err) {
       console.error('Error fetching schools:', err.response || err);
       setError(err.response?.data?.message || 'Failed to load schools');
       setMessage('Failed to load schools');
+    } finally {
       setLoading(false);
     }
   };
@@ -48,9 +90,6 @@ export default function AdminScreen({ onBack, onLogout }) {
     setLoading(true);
     setError(null);
     try {
-      // Log the request for debugging
-      console.log('Adding school:', { ...newSchool, grades });
-      
       const res = await axios.post(`${API_URL}/api/admin/schools`, 
         { ...newSchool, grades },
         { 
@@ -61,16 +100,15 @@ export default function AdminScreen({ onBack, onLogout }) {
         }
       );
       
-      console.log('Add school response:', res.data);
-      setNewSchool({ name: '', licenseExpiry: '' });
+      setNewSchool({ name: '', licenseExpiry: new Date() });
       setGrades([{ name: 'Grade 1' }]);
       setMessage('School added successfully');
-      setLoading(false);
       fetchSchools();
     } catch (err) {
       console.error('Error adding school:', err.response || err);
       setError(err.response?.data?.message || 'Failed to add school');
       setMessage('Failed to add school');
+    } finally {
       setLoading(false);
     }
   };
@@ -82,7 +120,7 @@ export default function AdminScreen({ onBack, onLogout }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.put(`${API_URL}/api/admin/schools/${selectedSchool._id}/renew`, 
+      await axios.put(`${API_URL}/api/admin/schools/${selectedSchool._id}/renew`, 
         { licenseExpiry: selectedSchool.licenseExpiry },
         { 
           headers: { 
@@ -92,15 +130,15 @@ export default function AdminScreen({ onBack, onLogout }) {
         }
       );
       
-      console.log('Renew license response:', res.data);
       setMessage('License renewed successfully');
       setSelectedSchool(null);
-      setLoading(false);
+      setOpenDialog(false);
       fetchSchools();
     } catch (err) {
       console.error('Error renewing license:', err.response || err);
       setError(err.response?.data?.message || 'Failed to renew license');
       setMessage('Failed to renew license');
+    } finally {
       setLoading(false);
     }
   };
@@ -116,141 +154,278 @@ export default function AdminScreen({ onBack, onLogout }) {
   };
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
+    return new Date(dateString).toLocaleDateString();
   };
 
   const isExpired = (dateString) => {
     return new Date(dateString) < new Date();
   };
 
+  if (loading && !schools.length) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
-    <div className="admin-container">
-      <div className="admin-header">
-        <h2>Admin Console</h2>
-        <div className="admin-actions">
-          <button className="admin-button back-button" onClick={onBack}>Back to Profile</button>
-          <button className="admin-button logout-button" onClick={onLogout}>Logout</button>
-        </div>
-      </div>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Paper 
+          elevation={3} 
+          sx={{ 
+            p: 3, 
+            borderRadius: 4,
+            background: 'linear-gradient(145deg, #ffffff 0%, #f5f5f5 100%)'
+          }}
+        >
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            mb: 3,
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: { xs: 2, sm: 0 }
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Button
+                variant="outlined"
+                startIcon={<BackIcon />}
+                onClick={onBack}
+              >
+                Back to Profile
+              </Button>
+              <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
+                Admin Console
+              </Typography>
+            </Box>
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<LogoutIcon />}
+              onClick={onLogout}
+            >
+              Logout
+            </Button>
+          </Box>
 
-      {message && <div className="admin-message">{message}</div>}
-      {error && <div className="admin-error">{error}</div>}
-
-      <div className="admin-section">
-        <h3>Add New School</h3>
-        <form onSubmit={handleAddSchool}>
-          <div className="form-group">
-            <label>School Name:</label>
-            <input 
-              type="text" 
-              value={newSchool.name} 
-              onChange={(e) => setNewSchool({...newSchool, name: e.target.value})}
-              required
-            />
-          </div>
-          
-          <div className="form-group">
-            <label>License Expiry Date:</label>
-            <input 
-              type="date" 
-              value={newSchool.licenseExpiry} 
-              onChange={(e) => setNewSchool({...newSchool, licenseExpiry: e.target.value})}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Grades:</label>
-            {grades.map((grade, index) => (
-              <div key={index} className="grade-input">
-                <select
-                  value={grade.name}
-                  onChange={(e) => updateGrade(index, e.target.value)}
-                  required
+          <AnimatePresence>
+            {message && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Alert 
+                  severity="success" 
+                  sx={{ mb: 3 }}
+                  onClose={() => setMessage('')}
                 >
-                  <option value="" disabled>Select grade</option>
-                  {Array.from({ length: 10 }, (_, i) => (
-                    <option key={i} value={`Grade ${i + 1}`}>
-                      Grade {i + 1}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ))}
-            <button type="button" className="add-grade-button" onClick={addGradeField}>Add Grade</button>
-          </div>
-          
-          <button type="submit" className="submit-button" disabled={loading}>
-            {loading ? 'Adding...' : 'Add School'}
-          </button>
-        </form>
-      </div>
+                  {message}
+                </Alert>
+              </motion.div>
+            )}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Alert 
+                  severity="error" 
+                  sx={{ mb: 3 }}
+                  onClose={() => setError(null)}
+                >
+                  {error}
+                </Alert>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-      <div className="admin-section">
-        <h3>Manage Schools</h3>
-        {loading ? (
-          <div className="loading">Loading schools...</div>
-        ) : schools.length > 0 ? (
-          <table className="schools-table">
-            <thead>
-              <tr>
-                <th>School Name</th>
-                <th>License Expiry</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {schools.map(school => (
-                <tr key={school._id} className={isExpired(school.licenseExpiry) ? 'expired-row' : ''}>
-                  <td>{school.name}</td>
-                  <td>{formatDate(school.licenseExpiry)}</td>
-                  <td>{isExpired(school.licenseExpiry) ? 'Expired' : 'Active'}</td>
-                  <td>
-                    <button 
-                      className="renew-button"
-                      onClick={() => setSelectedSchool({
-                        ...school,
-                        licenseExpiry: new Date(school.licenseExpiry).toISOString().split('T')[0]
-                      })}
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Paper sx={{ p: 3, borderRadius: 3 }}>
+                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <SchoolIcon color="primary" />
+                  Add New School
+                </Typography>
+                <Box component="form" onSubmit={handleAddSchool} sx={{ mt: 2 }}>
+                  <Stack spacing={3}>
+                    <TextField
+                      label="School Name"
+                      value={newSchool.name}
+                      onChange={(e) => setNewSchool({...newSchool, name: e.target.value})}
+                      required
+                      fullWidth
+                    />
+                    
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                      <DatePicker
+                        label="License Expiry Date"
+                        value={newSchool.licenseExpiry}
+                        onChange={(newValue) => setNewSchool({...newSchool, licenseExpiry: newValue})}
+                        renderInput={(params) => <TextField {...params} required fullWidth />}
+                      />
+                    </LocalizationProvider>
+
+                    <Box>
+                      <Typography variant="subtitle1" gutterBottom>Grades</Typography>
+                      <Stack spacing={2}>
+                        {grades.map((grade, index) => (
+                          <FormControl key={index} fullWidth>
+                            <InputLabel>Grade {index + 1}</InputLabel>
+                            <Select
+                              value={grade.name}
+                              onChange={(e) => updateGrade(index, e.target.value)}
+                              label={`Grade ${index + 1}`}
+                              required
+                            >
+                              {Array.from({ length: 10 }, (_, i) => (
+                                <MenuItem key={i} value={`Grade ${i + 1}`}>
+                                  Grade {i + 1}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        ))}
+                      </Stack>
+                      <Button
+                        startIcon={<AddIcon />}
+                        onClick={addGradeField}
+                        sx={{ mt: 2 }}
+                      >
+                        Add Grade
+                      </Button>
+                    </Box>
+
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      disabled={loading}
+                      startIcon={loading ? <CircularProgress size={20} /> : <SchoolIcon />}
                     >
-                      Renew
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <div className="no-schools">No schools found. Add a school to get started.</div>
-        )}
-      </div>
+                      {loading ? 'Adding...' : 'Add School'}
+                    </Button>
+                  </Stack>
+                </Box>
+              </Paper>
+            </Grid>
 
-      {selectedSchool && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>Renew License for {selectedSchool.name}</h3>
-            <form onSubmit={handleRenewLicense}>
-              <div className="form-group">
-                <label>New Expiry Date:</label>
-                <input 
-                  type="date" 
-                  value={selectedSchool.licenseExpiry}
-                  onChange={(e) => setSelectedSchool({...selectedSchool, licenseExpiry: e.target.value})}
-                  required
-                />
-              </div>
-              <div className="modal-actions">
-                <button type="submit" className="renew-button" disabled={loading}>
-                  {loading ? 'Renewing...' : 'Renew License'}
-                </button>
-                <button type="button" className="cancel-button" onClick={() => setSelectedSchool(null)}>Cancel</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
+            <Grid item xs={12} md={6}>
+              <Paper sx={{ p: 3, borderRadius: 3 }}>
+                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <SchoolIcon color="primary" />
+                  Manage Schools
+                </Typography>
+                
+                {loading ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                    <CircularProgress />
+                  </Box>
+                ) : schools.length > 0 ? (
+                  <TableContainer sx={{ mt: 2 }}>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>School Name</TableCell>
+                          <TableCell>License Expiry</TableCell>
+                          <TableCell>Status</TableCell>
+                          <TableCell align="right">Action</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {schools.map(school => (
+                          <TableRow 
+                            key={school._id}
+                            sx={{ 
+                              bgcolor: isExpired(school.licenseExpiry) ? 'error.light' : 'inherit',
+                              '&:hover': { bgcolor: 'action.hover' }
+                            }}
+                          >
+                            <TableCell>{school.name}</TableCell>
+                            <TableCell>{formatDate(school.licenseExpiry)}</TableCell>
+                            <TableCell>
+                              <Chip
+                                icon={isExpired(school.licenseExpiry) ? <WarningIcon /> : <CheckIcon />}
+                                label={isExpired(school.licenseExpiry) ? 'Expired' : 'Active'}
+                                color={isExpired(school.licenseExpiry) ? 'error' : 'success'}
+                                size="small"
+                              />
+                            </TableCell>
+                            <TableCell align="right">
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                startIcon={<RefreshIcon />}
+                                onClick={() => {
+                                  setSelectedSchool({
+                                    ...school,
+                                    licenseExpiry: new Date(school.licenseExpiry)
+                                  });
+                                  setOpenDialog(true);
+                                }}
+                              >
+                                Renew
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                ) : (
+                  <Box sx={{ p: 3, textAlign: 'center' }}>
+                    <Typography color="text.secondary">
+                      No schools found. Add a school to get started.
+                    </Typography>
+                  </Box>
+                )}
+              </Paper>
+            </Grid>
+          </Grid>
+        </Paper>
+      </motion.div>
+
+      <Dialog 
+        open={openDialog} 
+        onClose={() => setOpenDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          Renew License for {selectedSchool?.name}
+        </DialogTitle>
+        <DialogContent>
+          <Box component="form" onSubmit={handleRenewLicense} sx={{ mt: 2 }}>
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                label="New Expiry Date"
+                value={selectedSchool?.licenseExpiry}
+                onChange={(newValue) => setSelectedSchool({...selectedSchool, licenseExpiry: newValue})}
+                renderInput={(params) => <TextField {...params} fullWidth required />}
+              />
+            </LocalizationProvider>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleRenewLicense}
+            disabled={loading}
+            startIcon={loading ? <CircularProgress size={20} /> : <RefreshIcon />}
+          >
+            {loading ? 'Renewing...' : 'Renew License'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
   );
 }

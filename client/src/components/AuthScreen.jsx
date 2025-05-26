@@ -1,11 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-// Configure axios defaults
-axios.defaults.withCredentials = false; // Ensure no credentials are sent
+import { motion } from 'framer-motion';
+import {
+  Box,
+  Container,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  CircularProgress,
+  Alert,
+  useTheme,
+  useMediaQuery
+} from '@mui/material';
+import {
+  School as SchoolIcon,
+  Grade as GradeIcon,
+  Login as LoginIcon,
+  PersonAdd as RegisterIcon
+} from '@mui/icons-material';
 import API_URL from '../config';
 import './AuthScreen.css';
 
 const AuthScreen = ({ onLogin }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -18,6 +41,23 @@ const AuthScreen = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
   const [loadingSchools, setLoadingSchools] = useState(false);
   const [loadingGrades, setLoadingGrades] = useState(false);
+
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.5,
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: { opacity: 1, x: 0 }
+  };
 
   // Fetch schools for registration
   useEffect(() => {
@@ -181,94 +221,165 @@ const AuthScreen = ({ onLogin }) => {
   };
 
   return (
-    <div className="auth-wrapper">
-      <div className="auth-container">
-        <h2>{isLogin ? 'Login to Math Game' : 'Create an Account'}</h2>
-        
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="username">Username</label>
-            <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              placeholder="Enter your username"
-            />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="Enter your password"
-            />
-          </div>
-          
-          {!isLogin && (
-            <>
-              <div className="form-group">
-                <label htmlFor="school">School</label>
-                {loadingSchools ? (
-                  <div className="loading-schools">Loading schools...</div>
+    <Container maxWidth="sm" sx={{ py: 8 }}>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <Paper 
+          elevation={3} 
+          sx={{ 
+            p: 4, 
+            borderRadius: 4,
+            background: 'linear-gradient(145deg, #ffffff 0%, #f5f5f5 100%)'
+          }}
+        >
+          <motion.div variants={itemVariants}>
+            <Typography 
+              variant="h4" 
+              component="h1" 
+              align="center" 
+              gutterBottom
+              sx={{ 
+                fontWeight: 'bold',
+                color: 'primary.main',
+                mb: 4
+              }}
+            >
+              {isLogin ? 'Welcome Back!' : 'Join Math Game'}
+            </Typography>
+          </motion.div>
+
+          <Box 
+            component="form" 
+            onSubmit={handleSubmit}
+            sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}
+          >
+            <motion.div variants={itemVariants}>
+              <TextField
+                fullWidth
+                label="Username"
+                variant="outlined"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                sx={{ mb: 2 }}
+              />
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
+              <TextField
+                fullWidth
+                label="Password"
+                type="password"
+                variant="outlined"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                sx={{ mb: 2 }}
+              />
+            </motion.div>
+
+            {!isLogin && (
+              <>
+                <motion.div variants={itemVariants}>
+                  <FormControl fullWidth sx={{ mb: 2 }}>
+                    <InputLabel>School</InputLabel>
+                    <Select
+                      value={schoolId}
+                      onChange={handleSchoolChange}
+                      label="School"
+                      startAdornment={<SchoolIcon sx={{ mr: 1, color: 'primary.main' }} />}
+                      disabled={loadingSchools}
+                    >
+                      {schools.map((school) => (
+                        <MenuItem key={school._id} value={school._id}>
+                          {school.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {loadingSchools && (
+                      <CircularProgress size={20} sx={{ position: 'absolute', right: 12, top: 12 }} />
+                    )}
+                  </FormControl>
+                </motion.div>
+
+                <motion.div variants={itemVariants}>
+                  <FormControl fullWidth sx={{ mb: 2 }}>
+                    <InputLabel>Grade</InputLabel>
+                    <Select
+                      value={grade}
+                      onChange={(e) => setGrade(e.target.value)}
+                      label="Grade"
+                      startAdornment={<GradeIcon sx={{ mr: 1, color: 'primary.main' }} />}
+                      disabled={loadingGrades || grades.length === 0}
+                    >
+                      {grades.map((gradeItem, index) => (
+                        <MenuItem key={index} value={gradeItem.name}>
+                          {gradeItem.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {loadingGrades && (
+                      <CircularProgress size={20} sx={{ position: 'absolute', right: 12, top: 12 }} />
+                    )}
+                  </FormControl>
+                </motion.div>
+              </>
+            )}
+
+            <motion.div variants={itemVariants}>
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                fullWidth
+                disabled={loading || (!isLogin && (loadingSchools || loadingGrades))}
+                startIcon={isLogin ? <LoginIcon /> : <RegisterIcon />}
+                sx={{ 
+                  py: 1.5,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontSize: '1.1rem'
+                }}
+              >
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : isLogin ? (
+                  'Login'
                 ) : (
-                  <select
-                    id="school"
-                    value={schoolId}
-                    onChange={handleSchoolChange}
-                    required
-                  >
-                    <option value="" disabled>Select your school</option>
-                    {schools.map((schoolItem) => (
-                      <option key={schoolItem._id} value={schoolItem._id}>
-                        {schoolItem.name}
-                      </option>
-                    ))}
-                  </select>
+                  'Create Account'
                 )}
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="grade">Grade</label>
-                {loadingGrades ? (
-                  <div className="loading-grades">Loading grades...</div>
-                ) : (
-                  <select
-                    id="grade"
-                    value={grade}
-                    onChange={(e) => setGrade(e.target.value)}
-                    required
-                    disabled={grades.length === 0}
-                  >
-                    <option value="" disabled>Select your grade</option>
-                    {grades.map((gradeItem, index) => (
-                      <option key={index} value={gradeItem.name}>
-                        {gradeItem.name}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </div>
-            </>
-          )}
-          
-          <button type="submit" disabled={loading || (!isLogin && (loadingSchools || loadingGrades))}>
-            {loading ? 'Please wait...' : isLogin ? 'Login' : 'Register'}
-          </button>
-        </form>
-        
-        {error && <div className="auth-error">{error}</div>}
-        
-        <button className="toggle-auth-button" onClick={toggleAuthMode}>
-          {isLogin ? 'Need an account? Register' : 'Already have an account? Login'}
-        </button>
-      </div>
-    </div>
+              </Button>
+            </motion.div>
+
+            {error && (
+              <motion.div variants={itemVariants}>
+                <Alert severity="error" sx={{ mt: 2 }}>
+                  {error}
+                </Alert>
+              </motion.div>
+            )}
+
+            <motion.div variants={itemVariants}>
+              <Button
+                variant="text"
+                onClick={toggleAuthMode}
+                fullWidth
+                sx={{ 
+                  mt: 2,
+                  textTransform: 'none',
+                  color: 'text.secondary'
+                }}
+              >
+                {isLogin ? 'Need an account? Register' : 'Already have an account? Login'}
+              </Button>
+            </motion.div>
+          </Box>
+        </Paper>
+      </motion.div>
+    </Container>
   );
 };
 

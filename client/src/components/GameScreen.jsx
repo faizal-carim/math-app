@@ -1,11 +1,32 @@
 // src/components/GameScreen.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './GameScreen.css';
-import { CoinIcon, SkipIcon, CorrectIcon, IncorrectIcon, LogoutIcon } from './Icons';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Box, 
+  Container, 
+  Typography, 
+  Paper, 
+  Button, 
+  IconButton,
+  Grid,
+  useTheme,
+  useMediaQuery
+} from '@mui/material';
+import {
+  MonetizationOn as CoinIcon,
+  SkipNext as SkipIcon,
+  CheckCircle as CorrectIcon,
+  Cancel as IncorrectIcon,
+  Logout as LogoutIcon,
+  AccountCircle as ProfileIcon
+} from '@mui/icons-material';
+import Confetti from 'react-confetti';
 import API_URL from '../config';
 
 export default function GameScreen({ user, onLogout, onNavigate }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [questionData, setQuestionData] = useState(null);
   const [userAnswer, setUserAnswer] = useState('');
   const [message, setMessage] = useState('');
@@ -16,6 +37,7 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState("Loading...");
   const [userName, setUserName] = useState("Math Game");
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const token = localStorage.getItem('token');
 
@@ -159,77 +181,211 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
     }
   };
 
+  const renderKeypadButton = (key) => {
+    const isSpecial = key === 'enter' || key === 'del';
+    return (
+      <motion.div
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        style={{ width: '100%' }}
+      >
+        <Button
+          variant={isSpecial ? "contained" : "outlined"}
+          color={key === 'enter' ? "primary" : key === 'del' ? "error" : "inherit"}
+          fullWidth
+          size="large"
+          onClick={() => handleKeypadInput(key)}
+          sx={{
+            height: '60px',
+            fontSize: key === 'del' ? '1.5rem' : '1.2rem',
+            borderRadius: '12px',
+            textTransform: 'none'
+          }}
+        >
+          {key === 'del' ? '⌫' : key === 'enter' ? 'Enter' : key}
+        </Button>
+      </motion.div>
+    );
+  };
+
   useEffect(() => {
     fetchQuestion();
   }, []);
 
   return (
-    <div className="game-container">
-      <div className="game-header">
-        <h2>{userName}</h2>
-        <div className="game-stats">
-          <div className="stat-item">
-            <CoinIcon />
-            <span>{currency} Coins</span>
-          </div>
-          <div className="stat-item">
-            <SkipIcon />
-            <span>{skipsRemaining} Skips</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="game-content">
-        <div className="question-section">
-          <h3>What is the answer?</h3>
-          <div className={`question-bubble ${isAnimating ? 'pop-animation' : ''}`}>
-            <div className="question-text">{currentQuestion}</div>
-          </div>
-        </div>
-        
-        <div className="answer-section">
-          <label htmlFor="answer">Your Answer:</label>
-          <div className="answer-display">
-            <div className="answer-box" id="answer">{userAnswer || '?'}</div>
-          </div>
-        </div>
-        
-        <div className="keypad">
-          {['1','2','3','4','5','6','7','8','9','0','del','enter'].map((key) => (
-            <button
-              key={key}
-              className={`keypad-button ${key === 'enter' ? 'enter' : ''} ${key === 'del' ? 'del' : ''}`}
-              onClick={() => handleKeypadInput(key)}
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      {showConfetti && <Confetti recycle={false} numberOfPieces={200} />}
+      
+      <Paper 
+        elevation={3} 
+        sx={{ 
+          p: 3, 
+          borderRadius: 4,
+          background: 'linear-gradient(145deg, #ffffff 0%, #f5f5f5 100%)'
+        }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
+            {userName}
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Paper 
+              elevation={2} 
+              sx={{ 
+                p: 1.5, 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 1,
+                borderRadius: 2
+              }}
             >
-              {key === 'del' ? '⌫' : key === 'enter' ? 'Enter' : key}
-            </button>
+              <CoinIcon color="primary" />
+              <Typography variant="h6">{currency}</Typography>
+            </Paper>
+            <Paper 
+              elevation={2} 
+              sx={{ 
+                p: 1.5, 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 1,
+                borderRadius: 2
+              }}
+            >
+              <SkipIcon color="secondary" />
+              <Typography variant="h6">{skipsRemaining}</Typography>
+            </Paper>
+          </Box>
+        </Box>
+
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Paper 
+            elevation={4} 
+            sx={{ 
+              p: 4, 
+              mb: 4, 
+              textAlign: 'center',
+              borderRadius: 3,
+              background: 'linear-gradient(145deg, #e6f3ff 0%, #ffffff 100%)'
+            }}
+          >
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              What is the answer?
+            </Typography>
+            <Typography 
+              variant="h3" 
+              component="div" 
+              sx={{ 
+                fontWeight: 'bold',
+                color: 'primary.main',
+                my: 2,
+                transform: isAnimating ? 'scale(1.1)' : 'scale(1)',
+                transition: 'transform 0.3s ease'
+              }}
+            >
+              {currentQuestion}
+            </Typography>
+          </Paper>
+        </motion.div>
+
+        <Paper 
+          elevation={2} 
+          sx={{ 
+            p: 3, 
+            mb: 4, 
+            textAlign: 'center',
+            borderRadius: 3
+          }}
+        >
+          <Typography variant="h6" gutterBottom>Your Answer</Typography>
+          <Typography 
+            variant="h4" 
+            sx={{ 
+              fontFamily: 'monospace',
+              letterSpacing: 2,
+              color: 'text.primary'
+            }}
+          >
+            {userAnswer || '?'}
+          </Typography>
+        </Paper>
+
+        <Grid container spacing={2} sx={{ mb: 4 }}>
+          {['1','2','3','4','5','6','7','8','9','0','del','enter'].map((key) => (
+            <Grid item xs={3} key={key}>
+              {renderKeypadButton(key)}
+            </Grid>
           ))}
-        </div>
-        
-        <div className="game-actions">
-          <button className="game-button skip-button" onClick={skipQuestion}>
-            <SkipIcon />
-            <span>Skip</span>
-          </button>
-          <button className="game-button stop-button" onClick={() => onNavigate('profile')}>
-            <span>Profile</span>
-          </button>
-        </div>
-        
-        <div className="logout-container">
-          <button className="logout-button" onClick={onLogout}>
-            <LogoutIcon />
-            <span>Logout</span>
-          </button>
-        </div>
-        
-        {message && (
-          <div className="message-container">
-            {messageIcon}
-            <p className="message-text">{message}</p>
-          </div>
-        )}
-      </div>
-    </div>
+        </Grid>
+
+        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+          <Button
+            variant="contained"
+            color="secondary"
+            startIcon={<SkipIcon />}
+            onClick={skipQuestion}
+            disabled={skipsRemaining === 0}
+            sx={{ borderRadius: 2 }}
+          >
+            Skip ({skipsRemaining} left)
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<ProfileIcon />}
+            onClick={() => onNavigate('profile')}
+            sx={{ borderRadius: 2 }}
+          >
+            Profile
+          </Button>
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<LogoutIcon />}
+            onClick={onLogout}
+            sx={{ borderRadius: 2 }}
+          >
+            Logout
+          </Button>
+        </Box>
+
+        <AnimatePresence>
+          {message && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              style={{
+                position: 'fixed',
+                bottom: 20,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: 1000
+              }}
+            >
+              <Paper 
+                elevation={6} 
+                sx={{ 
+                  p: 2, 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 1,
+                  borderRadius: 2,
+                  background: message.includes('Correct') ? '#e8f5e9' : '#ffebee'
+                }}
+              >
+                {messageIcon}
+                <Typography variant="h6">
+                  {message}
+                </Typography>
+              </Paper>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </Paper>
+    </Container>
   );
 }
