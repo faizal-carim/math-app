@@ -4,7 +4,7 @@ services:
     name: math-game-client
     runtime: static
     buildCommand: cd client && npm install && npm run build
-    staticPublishPath: ./client/dist
+    staticPublishPath: ./client/build
     envVars:
       - key: NODE_VERSION
         value: 18.x
