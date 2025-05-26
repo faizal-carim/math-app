@@ -1,3 +1,3 @@
-const API_URL = 'http://localhost:3001';
+const API_URL = 'https://math-app-w36c.onrender.com';
 
 export default API_URL;
