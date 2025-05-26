@@ -1,10 +1,17 @@
 const express = require("express");
 const router = express.Router();
 const authenticate = require("../middleware/auth");
+const User = require("../models/User");
 
 router.get("/profile", authenticate, async (req, res) => {
   try {
-    const user = req.user;
+    const user = await User.findById(req.user.id).populate([
+      "avatar.equipped.hat",
+      "avatar.equipped.glasses",
+      "avatar.equipped.shirt",
+      "avatar.ownedItems"
+    ]);
+    
     res.json({
       name: user.username,
       email: user.email,

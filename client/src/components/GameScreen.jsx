@@ -11,7 +11,9 @@ import {
   IconButton,
   Grid,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  CircularProgress,
+  Avatar
 } from '@mui/material';
 import {
   MonetizationOn as CoinIcon,
@@ -19,7 +21,9 @@ import {
   CheckCircle as CorrectIcon,
   Cancel as IncorrectIcon,
   Logout as LogoutIcon,
-  AccountCircle as ProfileIcon
+  AccountCircle as ProfileIcon,
+  School as SchoolIcon,
+  AdminPanelSettings as AdminIcon
 } from '@mui/icons-material';
 import Confetti from 'react-confetti';
 import API_URL from '../config';
@@ -38,6 +42,9 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
   const [currentQuestion, setCurrentQuestion] = useState("Loading...");
   const [userName, setUserName] = useState("Math Game");
   const [showConfetti, setShowConfetti] = useState(false);
+  const [timer, setTimer] = useState(0);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const timerRef = React.useRef(null);
 
   const token = localStorage.getItem('token');
 
@@ -60,6 +67,31 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
     fetchUserProfile();
   }, [token]);
 
+  // Timer effect
+  useEffect(() => {
+    if (isTimerRunning) {
+      timerRef.current = setInterval(() => {
+        setTimer(prev => prev + 1);
+      }, 1000);
+    } else {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [isTimerRunning]);
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
   const fetchQuestion = async () => {
     try {
       const res = await axios.get(`${API_URL}/api/game/question`, {
@@ -72,8 +104,12 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
       if (res.data && res.data.question) {
         setCurrentQuestion(res.data.question + " = ?");
         setQuestionData(res.data);
+        // Reset and start timer
+        setTimer(0);
+        setIsTimerRunning(true);
       } else {
         setCurrentQuestion("Error loading question");
+        setIsTimerRunning(false);
       }
       
       setUserAnswer('');
@@ -84,6 +120,7 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
       console.error('Error fetching question:', err);
       setMessage('Failed to load question.');
       setCurrentQuestion("Error loading question");
+      setIsTimerRunning(false);
     }
   };
 
@@ -91,6 +128,7 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
     if (!questionData || userAnswer === '') return;
 
     const timeTaken = (Date.now() - startTime) / 1000;
+    setIsTimerRunning(false); // Stop timer when answering
 
     try {
       const res = await axios.post(
@@ -119,7 +157,6 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
       
       setIsAnimating(true);
       
-      // Always fetch a new question after a short delay, regardless of whether the answer was correct
       setTimeout(() => {
         setIsAnimating(false);
         fetchQuestion();
@@ -127,10 +164,12 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
     } catch (err) {
       console.error('Error submitting answer:', err);
       setMessage('Failed to submit answer.');
+      setIsTimerRunning(true); // Resume timer if submission fails
     }
   };
 
   const skipQuestion = async () => {
+    setIsTimerRunning(false); // Stop timer when skipping
     try {
       const res = await axios.post(
         `${API_URL}/api/game/skip`,
@@ -142,12 +181,10 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
         }
       );
       
-      // Update skips remaining (3 - current skips)
       const skipsUsed = res.data.skippedQuestions;
       setSkipsRemaining(3 - skipsUsed);
       setCurrency(res.data.currency);
       
-      // If skips reached 0, show message about coin deduction
       if (skipsUsed === 0 && skipsRemaining !== 3) {
         setMessage('Coin deducted!');
         setMessageIcon(<CoinIcon />);
@@ -168,6 +205,7 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
     } catch (err) {
       console.error('Error skipping question:', err);
       setMessage('Failed to skip question.');
+      setIsTimerRunning(true); // Resume timer if skip fails
     }
   };
 
@@ -212,6 +250,8 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
     fetchQuestion();
   }, []);
 
+  const isFaizalUser = userName && userName.toLowerCase() === "faizal";
+
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       {showConfetti && <Confetti recycle={false} numberOfPieces={200} />}
@@ -224,38 +264,275 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
           background: 'linear-gradient(145deg, #ffffff 0%, #f5f5f5 100%)'
         }}
       >
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-            {userName}
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Paper 
-              elevation={2} 
-              sx={{ 
-                p: 1.5, 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: 1,
-                borderRadius: 2
-              }}
-            >
-              <CoinIcon color="primary" />
-              <Typography variant="h6">{currency}</Typography>
-            </Paper>
-            <Paper 
-              elevation={2} 
-              sx={{ 
-                p: 1.5, 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: 1,
-                borderRadius: 2
-              }}
-            >
-              <SkipIcon color="secondary" />
-              <Typography variant="h6">{skipsRemaining}</Typography>
-            </Paper>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          mb: 3,
+          flexWrap: 'nowrap',
+          gap: 2
+        }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            gap: 2,
+            flex: 1,
+            minWidth: 0
+          }}>
+            <Box sx={{ position: 'relative', flexShrink: 0 }}>
+              <Avatar
+                sx={{
+                  width: { xs: 48, sm: 56 },
+                  height: { xs: 48, sm: 56 },
+                  bgcolor: theme.palette.primary.main,
+                  fontSize: { xs: '1.2rem', sm: '1.5rem' },
+                  border: '3px solid',
+                  borderColor: isFaizalUser ? 'primary.main' : 'transparent',
+                  boxShadow: 3,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'scale(1.05)',
+                    boxShadow: 6
+                  }
+                }}
+              >
+                {userName.charAt(0).toUpperCase()}
+              </Avatar>
+              {isFaizalUser && (
+                <Box 
+                  sx={{ 
+                    position: 'absolute',
+                    bottom: -4,
+                    right: -4,
+                    bgcolor: 'primary.main',
+                    borderRadius: '50%',
+                    p: 0.5,
+                    boxShadow: 2
+                  }}
+                >
+                  <AdminIcon 
+                    sx={{ 
+                      fontSize: { xs: '0.875rem', sm: '1rem' },
+                      color: 'white'
+                    }} 
+                  />
+                </Box>
+              )}
+            </Box>
+            <Box sx={{ 
+              display: { xs: 'none', sm: 'flex' },
+              alignItems: 'center', 
+              gap: 2,
+              flexWrap: 'wrap'
+            }}>
+              <Paper 
+                elevation={2} 
+                sx={{ 
+                  p: 1.5, 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 1,
+                  borderRadius: 2,
+                  background: 'linear-gradient(145deg, #ffffff 0%, #f0f0f0 100%)',
+                  border: '2px solid',
+                  borderColor: isTimerRunning ? 'primary.main' : 'grey.300',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: 6
+                  }
+                }}
+              >
+                <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                  <CircularProgress
+                    variant="determinate"
+                    value={(timer % 60) * 1.67}
+                    size={24}
+                    thickness={4}
+                    sx={{ 
+                      color: isTimerRunning ? 'primary.main' : 'grey.400',
+                      transition: 'color 0.3s ease'
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      top: 0,
+                      left: 0,
+                      bottom: 0,
+                      right: 0,
+                      position: 'absolute',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Typography 
+                      variant="body2" 
+                      component="div" 
+                      sx={{ 
+                        fontWeight: 'bold',
+                        color: isTimerRunning ? 'primary.main' : 'text.secondary',
+                        transition: 'color 0.3s ease',
+                        fontSize: '0.875rem'
+                      }}
+                    >
+                      {formatTime(timer)}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Paper>
+              <Paper 
+                elevation={2} 
+                sx={{ 
+                  p: 1.5, 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 1,
+                  borderRadius: 2
+                }}
+              >
+                <CoinIcon color="primary" />
+                <Typography variant="h6">{currency}</Typography>
+              </Paper>
+              <Paper 
+                elevation={2} 
+                sx={{ 
+                  p: 1.5, 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 1,
+                  borderRadius: 2
+                }}
+              >
+                <SkipIcon color="secondary" />
+                <Typography variant="h6">{skipsRemaining}</Typography>
+              </Paper>
+            </Box>
           </Box>
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 1,
+            alignItems: 'center',
+            flexShrink: 0
+          }}>
+            <IconButton
+              color="primary"
+              onClick={() => onNavigate('profile')}
+              sx={{ 
+                bgcolor: 'primary.main',
+                color: 'white',
+                '&:hover': {
+                  bgcolor: 'primary.dark',
+                },
+                width: { xs: 40, sm: 48 },
+                height: { xs: 40, sm: 48 }
+              }}
+            >
+              <ProfileIcon />
+            </IconButton>
+            <IconButton
+              color="error"
+              onClick={onLogout}
+              sx={{ 
+                bgcolor: 'error.main',
+                color: 'white',
+                '&:hover': {
+                  bgcolor: 'error.dark',
+                },
+                width: { xs: 40, sm: 48 },
+                height: { xs: 40, sm: 48 }
+              }}
+            >
+              <LogoutIcon />
+            </IconButton>
+          </Box>
+        </Box>
+
+        {/* Add timer and stats below for mobile view */}
+        <Box sx={{ 
+          display: { xs: 'flex', sm: 'none' },
+          gap: 2,
+          mb: 3,
+          flexWrap: 'wrap'
+        }}>
+          <Paper 
+            elevation={2} 
+            sx={{ 
+              p: 1.5, 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1,
+              borderRadius: 2,
+              background: 'linear-gradient(145deg, #ffffff 0%, #f0f0f0 100%)',
+              border: '2px solid',
+              borderColor: isTimerRunning ? 'primary.main' : 'grey.300',
+              transition: 'all 0.3s ease'
+            }}
+          >
+            <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+              <CircularProgress
+                variant="determinate"
+                value={(timer % 60) * 1.67}
+                size={24}
+                thickness={4}
+                sx={{ 
+                  color: isTimerRunning ? 'primary.main' : 'grey.400',
+                  transition: 'color 0.3s ease'
+                }}
+              />
+              <Box
+                sx={{
+                  top: 0,
+                  left: 0,
+                  bottom: 0,
+                  right: 0,
+                  position: 'absolute',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Typography 
+                  variant="body2" 
+                  component="div" 
+                  sx={{ 
+                    fontWeight: 'bold',
+                    color: isTimerRunning ? 'primary.main' : 'text.secondary',
+                    transition: 'color 0.3s ease',
+                    fontSize: '0.875rem'
+                  }}
+                >
+                  {formatTime(timer)}
+                </Typography>
+              </Box>
+            </Box>
+          </Paper>
+          <Paper 
+            elevation={2} 
+            sx={{ 
+              p: 1.5, 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1,
+              borderRadius: 2
+            }}
+          >
+            <CoinIcon color="primary" />
+            <Typography variant="h6">{currency}</Typography>
+          </Paper>
+          <Paper 
+            elevation={2} 
+            sx={{ 
+              p: 1.5, 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1,
+              borderRadius: 2
+            }}
+          >
+            <SkipIcon color="secondary" />
+            <Typography variant="h6">{skipsRemaining}</Typography>
+          </Paper>
         </Box>
 
         <motion.div

@@ -24,14 +24,13 @@ import {
 import {
   MonetizationOn as CoinIcon,
   ArrowBack as BackIcon,
-  SportsEsports as HatIcon,
-  Visibility as GlassesIcon,
-  Checkroom as ShirtIcon,
   Store as StoreIcon,
   CheckCircle as CheckIcon,
   ShoppingCart as CartIcon,
-  Person as PersonIcon
+  Person as PersonIcon,
+  AutoAwesome as SparkleIcon
 } from '@mui/icons-material';
+import { HatIcon, GlassesIcon, ShirtIcon } from './Icons';
 import API_URL from '../config';
 
 const TabPanel = ({ children, value, index, ...other }) => (
@@ -157,7 +156,8 @@ export default function StoreScreen({ onBack }) {
   };
 
   const userOwnsItem = (itemId) => {
-    return userProfile?.avatar?.ownedItems?.includes(itemId);
+    if (!userProfile?.avatar?.ownedItems) return false;
+    return userProfile.avatar.ownedItems.some(item => item._id === itemId || item === itemId);
   };
 
   const filteredItems = categories[activeCategory].id === 'all' 
@@ -263,9 +263,53 @@ export default function StoreScreen({ onBack }) {
               >
                 Back
               </Button>
-              <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-                Avatar Store
-              </Typography>
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                position: 'relative',
+                width: 60,
+                height: 60,
+                cursor: 'pointer',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                  transition: 'transform 0.2s ease'
+                }
+              }}>
+                <StoreIcon 
+                  sx={{ 
+                    fontSize: '3.5rem',
+                    background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.2))',
+                    animation: 'float 3s ease-in-out infinite',
+                    '@keyframes float': {
+                      '0%': { transform: 'translate(-50%, -50%)' },
+                      '50%': { transform: 'translate(-50%, -55%)' },
+                      '100%': { transform: 'translate(-50%, -50%)' }
+                    }
+                  }} 
+                />
+                <SparkleIcon 
+                  sx={{ 
+                    color: 'primary.light',
+                    fontSize: '1.2rem',
+                    position: 'absolute',
+                    top: '15%',
+                    right: '15%',
+                    animation: 'sparkle 2s infinite',
+                    '@keyframes sparkle': {
+                      '0%': { opacity: 0.5, transform: 'scale(1)' },
+                      '50%': { opacity: 1, transform: 'scale(1.2)' },
+                      '100%': { opacity: 0.5, transform: 'scale(1)' }
+                    }
+                  }} 
+                />
+              </Box>
             </Box>
             <Box sx={{ 
               display: 'flex', 
@@ -324,9 +368,39 @@ export default function StoreScreen({ onBack }) {
                             alignItems: 'center',
                             gap: 1
                           }}>
-                            {item.category === 'hat' && <HatIcon sx={{ fontSize: 40 }} color="primary" />}
-                            {item.category === 'glasses' && <GlassesIcon sx={{ fontSize: 40 }} color="secondary" />}
-                            {item.category === 'shirt' && <ShirtIcon sx={{ fontSize: 40 }} color="success" />}
+                            {item.category === 'hat' && (
+                              <Box sx={{ 
+                                color: 'primary.main',
+                                '& svg': {
+                                  width: 48,
+                                  height: 48
+                                }
+                              }}>
+                                <HatIcon />
+                              </Box>
+                            )}
+                            {item.category === 'glasses' && (
+                              <Box sx={{ 
+                                color: 'secondary.main',
+                                '& svg': {
+                                  width: 48,
+                                  height: 48
+                                }
+                              }}>
+                                <GlassesIcon />
+                              </Box>
+                            )}
+                            {item.category === 'shirt' && (
+                              <Box sx={{ 
+                                color: 'success.main',
+                                '& svg': {
+                                  width: 48,
+                                  height: 48
+                                }
+                              }}>
+                                <ShirtIcon />
+                              </Box>
+                            )}
                             
                             <Typography variant="h6" align="center">
                               {item.name}
@@ -383,9 +457,39 @@ export default function StoreScreen({ onBack }) {
                         gap: 1,
                         mb: 2
                       }}>
-                        {selectedItem.category === 'hat' && <HatIcon color="primary" />}
-                        {selectedItem.category === 'glasses' && <GlassesIcon color="secondary" />}
-                        {selectedItem.category === 'shirt' && <ShirtIcon color="success" />}
+                        {selectedItem.category === 'hat' && (
+                          <Box sx={{ 
+                            color: 'primary.main',
+                            '& svg': {
+                              width: 40,
+                              height: 40
+                            }
+                          }}>
+                            <HatIcon />
+                          </Box>
+                        )}
+                        {selectedItem.category === 'glasses' && (
+                          <Box sx={{ 
+                            color: 'secondary.main',
+                            '& svg': {
+                              width: 40,
+                              height: 40
+                            }
+                          }}>
+                            <GlassesIcon />
+                          </Box>
+                        )}
+                        {selectedItem.category === 'shirt' && (
+                          <Box sx={{ 
+                            color: 'success.main',
+                            '& svg': {
+                              width: 40,
+                              height: 40
+                            }
+                          }}>
+                            <ShirtIcon />
+                          </Box>
+                        )}
                         <Typography variant="body1" sx={{ textTransform: 'capitalize' }}>
                           {selectedItem.category}
                         </Typography>

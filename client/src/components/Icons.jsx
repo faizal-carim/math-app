@@ -84,26 +84,26 @@ export const AvatarIcon = () => (
 
 export const HatIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M4 14L12 8L20 14" fill="#3F51B5"/>
-    <path d="M6 14V16H18V14" stroke="#3F51B5" strokeWidth="2"/>
-    <rect x="8" y="16" width="8" height="2" fill="#3F51B5"/>
+    <path d="M4 14L12 8L20 14" fill="currentColor" opacity="0.9"/>
+    <path d="M6 14V16H18V14" stroke="currentColor" strokeWidth="2" opacity="0.9"/>
+    <rect x="8" y="16" width="8" height="2" fill="currentColor" opacity="0.9"/>
   </svg>
 );
 
 export const GlassesIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="7" cy="12" r="3" stroke="#FFFFFF" strokeWidth="1.5"/>
-    <circle cx="17" cy="12" r="3" stroke="#FFFFFF" strokeWidth="1.5"/>
-    <path d="M10 12H14" stroke="#FFFFFF" strokeWidth="1.5"/>
-    <path d="M4 12H3" stroke="#FFFFFF" strokeWidth="1.5"/>
-    <path d="M21 12H20" stroke="#FFFFFF" strokeWidth="1.5"/>
+    <circle cx="7" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+    <circle cx="17" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+    <path d="M10 12H14" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M4 12H3" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M21 12H20" stroke="currentColor" strokeWidth="1.5"/>
   </svg>
 );
 
 export const ShirtIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M6 4L8 3H16L18 4L20 8L18 9V20H6V9L4 8L6 4Z" fill="#E91E63"/>
-    <path d="M12 3V9" stroke="white" strokeWidth="1.5"/>
+    <path d="M6 4L8 3H16L18 4L20 8L18 9V20H6V9L4 8L6 4Z" fill="currentColor" opacity="0.9"/>
+    <path d="M12 3V9" stroke="currentColor" strokeWidth="1.5" opacity="0.7"/>
   </svg>
 );
 
