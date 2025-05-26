@@ -9,13 +9,12 @@ services:
       - key: NODE_VERSION
         value: 20.x
 
-  # Backend API service (your existing service)
-  # Uncomment and adjust if you want to define your backend here too
-  # - type: web
-  #   name: math-game-api
-  #   runtime: node
-  #   buildCommand: cd server && npm install
-  #   startCommand: cd server && node src/index.js
-  #   envVars:
-  #     - key: NODE_VERSION
-  #       value: 18.x
+  # Backend API service
+  - type: web
+    name: math-game-api
+    runtime: node
+    buildCommand: cd server && npm install
+    startCommand: cd server && node src/index.js
+    envVars:
+      - key: NODE_VERSION
+        value: 20.x
