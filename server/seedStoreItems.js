@@ -7,9 +7,9 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
   .then(async () => {
     await StoreItem.deleteMany(); // optional: clear existing items
     await StoreItem.insertMany([
-      { name: "Wizard Hat", category: "hat", price: 5, imageUrl: "" },
-      { name: "Cool Glasses", category: "glasses", price: 3, imageUrl: "" },
-      { name: "Cape", category: "shirt", price: 7, imageUrl: "" }
+      { name: "Wizard Hat", category: "hat", price: 5, iconName: "wizardHat" },
+      { name: "Cool Glasses", category: "glasses", price: 3, iconName: "coolGlasses" },
+      { name: "Cape", category: "shirt", price: 7, iconName: "cape" }
     ]);
     console.log("✅ Store items seeded.");
     mongoose.disconnect();

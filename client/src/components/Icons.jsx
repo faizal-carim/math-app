@@ -122,3 +122,45 @@ export const AdminIcon = () => (
     <path d="M4 16L12 20L20 16" stroke="#9C27B0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
+
+// Specific item icons
+export const WizardHatIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 3L4 15H20L12 3Z" fill="#673AB7" opacity="0.9"/>
+    <path d="M7 15L12 10L17 15" fill="#9575CD" opacity="0.8"/>
+    <path d="M8 15V17H16V15" stroke="#512DA8" strokeWidth="1.5"/>
+    <circle cx="12" cy="8" r="1" fill="#FFC107"/>
+    <circle cx="9" cy="11" r="0.8" fill="#FFC107"/>
+    <circle cx="15" cy="10" r="0.8" fill="#FFC107"/>
+  </svg>
+);
+
+export const CoolGlassesIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="7" cy="12" r="3" stroke="#2196F3" strokeWidth="1.5" fill="#E3F2FD"/>
+    <circle cx="17" cy="12" r="3" stroke="#2196F3" strokeWidth="1.5" fill="#E3F2FD"/>
+    <path d="M10 12H14" stroke="#2196F3" strokeWidth="1.5"/>
+    <path d="M4 12H3" stroke="#2196F3" strokeWidth="1.5"/>
+    <path d="M21 12H20" stroke="#2196F3" strokeWidth="1.5"/>
+    <path d="M7 9L17 9" stroke="#2196F3" strokeWidth="1"/>
+  </svg>
+);
+
+export const CapeIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M6 4L8 3H16L18 4L20 8L18 9V20H6V9L4 8L6 4Z" fill="#F44336" opacity="0.9"/>
+    <path d="M12 3V20" stroke="#B71C1C" strokeWidth="1" opacity="0.7"/>
+    <path d="M8 12C10 16 14 16 16 12" stroke="#B71C1C" strokeWidth="1" opacity="0.7"/>
+  </svg>
+);
+
+// Function to get specific icon by name
+export const getItemIcon = (iconName) => {
+  // Convert camelCase to PascalCase and add "Icon" suffix if not present
+  const pascalCase = iconName.charAt(0).toUpperCase() + iconName.slice(1);
+  const componentName = pascalCase.endsWith('Icon') ? pascalCase : pascalCase + 'Icon';
+  
+  // Try to get the component from this module's exports
+  const IconComponent = exports[componentName];
+  return IconComponent ? <IconComponent /> : null;
+};
