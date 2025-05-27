@@ -415,46 +415,34 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
             alignItems: 'center',
             flexShrink: 0
           }}>
-            <IconButton
-              color="primary"
-              onClick={() => onNavigate('profile')}
-              sx={{ 
-                bgcolor: 'primary.main',
-                color: 'white',
-                '&:hover': {
-                  bgcolor: 'primary.dark',
-                },
-                width: { xs: 40, sm: 48 },
-                height: { xs: 40, sm: 48 }
-              }}
-            >
-              <ProfileIcon />
-            </IconButton>
-            <IconButton
-              color="error"
-              onClick={onLogout}
-              sx={{ 
-                bgcolor: 'error.main',
-                color: 'white',
-                '&:hover': {
-                  bgcolor: 'error.dark',
-                },
-                width: { xs: 40, sm: 48 },
-                height: { xs: 40, sm: 48 }
-              }}
-            >
-              <LogoutIcon />
-            </IconButton>
-          </Box>
-        </Box>
+            
 
-        {/* Add timer and stats below for mobile view */}
-        <Box sx={{ 
-          display: { xs: 'flex', sm: 'none' },
-          gap: 2,
-          mb: 3,
-          flexWrap: 'wrap'
-        }}>
+            <Paper 
+            elevation={2} 
+              sx={{ 
+              p: 1.5, 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1,
+              borderRadius: 2
+              }}
+            >
+            <CoinIcon color="primary" />
+            <Typography variant="h6">{currency}</Typography>
+          </Paper>
+          <Paper 
+            elevation={2} 
+              sx={{ 
+              p: 1.5, 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1,
+              borderRadius: 2
+            }}
+          >
+            <SkipIcon color="secondary" />
+            <Typography variant="h6">{skipsRemaining}</Typography>
+          </Paper>
           <Paper 
             elevation={2} 
             sx={{ 
@@ -474,7 +462,7 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
                 variant="determinate"
                 value={(timer % 60) * 1.67}
                 size={24}
-                thickness={4}
+                thickness={0}
                 sx={{ 
                   color: isTimerRunning ? 'primary.main' : 'grey.400',
                   transition: 'color 0.3s ease'
@@ -507,32 +495,18 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
               </Box>
             </Box>
           </Paper>
-          <Paper 
-            elevation={2} 
-            sx={{ 
-              p: 1.5, 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 1,
-              borderRadius: 2
-            }}
-          >
-            <CoinIcon color="primary" />
-            <Typography variant="h6">{currency}</Typography>
-          </Paper>
-          <Paper 
-            elevation={2} 
-            sx={{ 
-              p: 1.5, 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 1,
-              borderRadius: 2
-            }}
-          >
-            <SkipIcon color="secondary" />
-            <Typography variant="h6">{skipsRemaining}</Typography>
-          </Paper>
+          
+          </Box>
+        </Box>
+
+        {/* Add timer and stats below for mobile view */}
+        <Box sx={{ 
+          display: { xs: 'flex', sm: 'none' },
+          gap: 2,
+          mb: 3,
+          flexWrap: 'wrap'
+        }}>
+          
         </Box>
 
         <motion.div
@@ -545,14 +519,12 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
             sx={{ 
               p: 4, 
               mb: 4, 
+              padding : '5px',
               textAlign: 'center',
               borderRadius: 3,
               background: 'linear-gradient(145deg, #e6f3ff 0%, #ffffff 100%)'
             }}
           >
-            <Typography variant="h6" color="text.secondary" gutterBottom>
-              What is the answer?
-            </Typography>
             <Typography 
               variant="h3" 
               component="div" 
@@ -578,7 +550,7 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
             borderRadius: 3
           }}
         >
-          <Typography variant="h6" gutterBottom>Your Answer</Typography>
+          
           <Typography 
             variant="h4" 
             sx={{ 
@@ -587,13 +559,13 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
               color: 'text.primary'
             }}
           >
-            {userAnswer || '?'}
+            {userAnswer || '_'}
           </Typography>
         </Paper>
 
         <Grid container spacing={2} sx={{ mb: 4 }}>
-          {['1','2','3','4','5','6','7','8','9','0','del','enter'].map((key) => (
-            <Grid item xs={3} key={key}>
+          {['1','2','3','4','5','6','7','8','9','del','0','enter'].map((key) => (
+            <Grid item xs={4} key={key}>
               {renderKeypadButton(key)}
             </Grid>
           ))}
@@ -608,7 +580,7 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
             disabled={skipsRemaining === 0}
             sx={{ borderRadius: 2 }}
           >
-            Skip ({skipsRemaining} left)
+             ({skipsRemaining})
           </Button>
           <Button
             variant="outlined"
@@ -616,7 +588,7 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
             onClick={() => onNavigate('profile')}
             sx={{ borderRadius: 2 }}
           >
-            Profile
+            
           </Button>
           <Button
             variant="outlined"
@@ -625,7 +597,6 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
             onClick={onLogout}
             sx={{ borderRadius: 2 }}
           >
-            Logout
           </Button>
         </Box>
 
@@ -637,8 +608,8 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
               exit={{ opacity: 0, y: -20 }}
               style={{
                 position: 'fixed',
-                bottom: 20,
-                left: '50%',
+                bottom: '50%',
+                left: '30%',
                 transform: 'translateX(-50%)',
                 zIndex: 1000
               }}

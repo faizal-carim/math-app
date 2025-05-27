@@ -30,7 +30,7 @@ import {
   Person as PersonIcon,
   AutoAwesome as SparkleIcon
 } from '@mui/icons-material';
-import { HatIcon, GlassesIcon, ShirtIcon } from './Icons';
+import { HatIcon, GlassesIcon, ShirtIcon, getItemIcon } from './Icons';
 import API_URL from '../config';
 
 const TabPanel = ({ children, value, index, ...other }) => (
@@ -329,7 +329,7 @@ export default function StoreScreen({ onBack }) {
           <Tabs
             value={activeCategory}
             onChange={(e, newValue) => setActiveCategory(newValue)}
-            variant={isMobile ? "fullWidth" : "standard"}
+            variant={isMobile ? "scrollable" : "standard"}
             sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
           >
             {categories.map((category, index) => (
@@ -368,37 +368,20 @@ export default function StoreScreen({ onBack }) {
                             alignItems: 'center',
                             gap: 1
                           }}>
-                            {item.category === 'hat' && (
-                              <Box sx={{ 
-                                color: 'primary.main',
-                                '& svg': {
-                                  width: 48,
-                                  height: 48
-                                }
-                              }}>
-                                <HatIcon />
+                            {item.iconName && getItemIcon(item.iconName) ? (
+                              <Box sx={{ '& svg': { width: 48, height: 48 } }}>
+                                {getItemIcon(item.iconName)}
                               </Box>
-                            )}
-                            {item.category === 'glasses' && (
+                            ) : (
+                              // Fallback to category icons
                               <Box sx={{ 
-                                color: 'secondary.main',
-                                '& svg': {
-                                  width: 48,
-                                  height: 48
-                                }
+                                color: item.category === 'hat' ? 'primary.main' : 
+                                      item.category === 'glasses' ? 'secondary.main' : 'success.main',
+                                '& svg': { width: 48, height: 48 }
                               }}>
-                                <GlassesIcon />
-                              </Box>
-                            )}
-                            {item.category === 'shirt' && (
-                              <Box sx={{ 
-                                color: 'success.main',
-                                '& svg': {
-                                  width: 48,
-                                  height: 48
-                                }
-                              }}>
-                                <ShirtIcon />
+                                {item.category === 'hat' && <HatIcon />}
+                                {item.category === 'glasses' && <GlassesIcon />}
+                                {item.category === 'shirt' && <ShirtIcon />}
                               </Box>
                             )}
                             
@@ -457,38 +440,46 @@ export default function StoreScreen({ onBack }) {
                         gap: 1,
                         mb: 2
                       }}>
-                        {selectedItem.category === 'hat' && (
-                          <Box sx={{ 
-                            color: 'primary.main',
-                            '& svg': {
-                              width: 40,
-                              height: 40
-                            }
-                          }}>
-                            <HatIcon />
+                        {selectedItem.iconName && getItemIcon(selectedItem.iconName) ? (
+                          <Box sx={{ '& svg': { width: 40, height: 40 } }}>
+                            {getItemIcon(selectedItem.iconName)}
                           </Box>
-                        )}
-                        {selectedItem.category === 'glasses' && (
-                          <Box sx={{ 
-                            color: 'secondary.main',
-                            '& svg': {
-                              width: 40,
-                              height: 40
-                            }
-                          }}>
-                            <GlassesIcon />
-                          </Box>
-                        )}
-                        {selectedItem.category === 'shirt' && (
-                          <Box sx={{ 
-                            color: 'success.main',
-                            '& svg': {
-                              width: 40,
-                              height: 40
-                            }
-                          }}>
-                            <ShirtIcon />
-                          </Box>
+                        ) : (
+                          <>
+                            {selectedItem.category === 'hat' && (
+                              <Box sx={{ 
+                                color: 'primary.main',
+                                '& svg': {
+                                  width: 40,
+                                  height: 40
+                                }
+                              }}>
+                                <HatIcon />
+                              </Box>
+                            )}
+                            {selectedItem.category === 'glasses' && (
+                              <Box sx={{ 
+                                color: 'secondary.main',
+                                '& svg': {
+                                  width: 40,
+                                  height: 40
+                                }
+                              }}>
+                                <GlassesIcon />
+                              </Box>
+                            )}
+                            {selectedItem.category === 'shirt' && (
+                              <Box sx={{ 
+                                color: 'success.main',
+                                '& svg': {
+                                  width: 40,
+                                  height: 40
+                                }
+                              }}>
+                                <ShirtIcon />
+                              </Box>
+                            )}
+                          </>
                         )}
                         <Typography variant="body1" sx={{ textTransform: 'capitalize' }}>
                           {selectedItem.category}

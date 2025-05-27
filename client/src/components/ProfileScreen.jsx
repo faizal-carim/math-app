@@ -1038,7 +1038,7 @@ export default function ProfileScreen({ user, onBack, onLogout, onNavigate }) {
           <Tabs
             value={activeTab}
             onChange={(e, newValue) => setActiveTab(newValue)}
-            variant={isMobile ? "fullWidth" : "standard"}
+            variant={isMobile ? "scrollable" : "standard"}
             sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
           >
             <Tab icon={<TrophyIcon />} label="Stats" />
