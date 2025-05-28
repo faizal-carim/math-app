@@ -103,27 +103,17 @@ router.get("/question", authenticate, async (req, res) => {
     const user = req.user;
     const grade = user.grade;
   
+    // Include all operations with equal probability
     const operations = ["+", "-", "×"];
     const operation = operations[Math.floor(Math.random() * operations.length)];
   
-    let min = 1, max = 10;
+    let min = 10, max = 99; // Default to double digits for all operations
     let num1, num2, answer, displayOp;
-  
-    // Customize difficulty based on grade
-    if (grade.includes("Grade 1")) {
-      max = 10;
-    } else if (grade.includes("Grade 2")) {
-      max = 20;
-    } else if (grade.includes("Grade 3")) {
-      max = 50;
-    } else {
-      max = 100;
-    }
   
     // Generate numbers based on operation
     switch (operation) {
       case "+":
-        // Addition - just use the grade-based limits
+        // Addition - always double digits (10-99)
         num1 = Math.floor(Math.random() * (max - min + 1)) + min;
         num2 = Math.floor(Math.random() * (max - min + 1)) + min;
         answer = num1 + num2;
@@ -131,35 +121,23 @@ router.get("/question", authenticate, async (req, res) => {
         break;
         
       case "-":
-        // Subtraction - ensure positive answer by making first number >= second number
+        // Subtraction - ensure positive answer with double digits
         num1 = Math.floor(Math.random() * (max - min + 1)) + min;
-        // Second number must be less than or equal to first number
-        num2 = Math.floor(Math.random() * num1) + min;
+        // Second number must be less than first number but still double digit
+        const minNum2 = Math.max(10, num1 - 89); // Ensure num2 is at least 10
+        const maxNum2 = num1 - 1; // Ensure result is positive
+        num2 = Math.floor(Math.random() * (maxNum2 - minNum2 + 1)) + minNum2;
         answer = num1 - num2;
         displayOp = "-";
         break;
         
       case "×":
-        // Multiplication - limit to max of 12, and if one number is 2 digits, the other is 1 digit
-        const multiMax = Math.min(12, max); // Cap at 12 for multiplication
+        // Multiplication - use times tables from 2 to 15
+        const tables = Array.from({length: 14}, (_, i) => i + 2); // 2 to 15
+        num1 = tables[Math.floor(Math.random() * tables.length)];
         
-        // First, decide if we're using a 2-digit number
-        const useTwoDigits = multiMax > 9 && Math.random() > 0.5;
-        
-        if (useTwoDigits) {
-          // One 2-digit number, one 1-digit number
-          num1 = Math.floor(Math.random() * (multiMax - 10 + 1)) + 10; // 10 to multiMax
-          num2 = Math.floor(Math.random() * 9) + 1; // 1 to 9
-          
-          // Randomly swap them
-          if (Math.random() > 0.5) {
-            [num1, num2] = [num2, num1];
-          }
-        } else {
-          // Both 1-digit numbers
-          num1 = Math.floor(Math.random() * 9) + 1; // 1 to 9
-          num2 = Math.floor(Math.random() * 9) + 1; // 1 to 9
-        }
+        // Second number also from 2 to 15
+        num2 = tables[Math.floor(Math.random() * tables.length)];
         
         answer = num1 * num2;
         displayOp = "×";

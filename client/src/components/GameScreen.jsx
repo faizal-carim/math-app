@@ -44,6 +44,7 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
   const [showConfetti, setShowConfetti] = useState(false);
   const [timer, setTimer] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [answerStatus, setAnswerStatus] = useState(null); // 'correct', 'incorrect', or null
   const timerRef = React.useRef(null);
 
   const token = localStorage.getItem('token');
@@ -115,6 +116,7 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
       setUserAnswer('');
       setMessage('');
       setMessageIcon(null);
+      setAnswerStatus(null); // Reset answer status
       setStartTime(Date.now());
     } catch (err) {
       console.error('Error fetching question:', err);
@@ -147,18 +149,14 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
 
       setCurrency(res.data.currency);
       
-      if (res.data.isCorrect) {
-        setMessage('Correct!');
-        setMessageIcon(<CorrectIcon />);
-      } else {
-        setMessage('Incorrect');
-        setMessageIcon(<IncorrectIcon />);
-      }
+      // Set answer status based on correctness
+      setAnswerStatus(res.data.isCorrect ? 'correct' : 'incorrect');
       
       setIsAnimating(true);
       
       setTimeout(() => {
         setIsAnimating(false);
+        setAnswerStatus(null); // Reset answer status
         fetchQuestion();
       }, 1500);
     } catch (err) {
@@ -547,16 +545,26 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
             p: 3, 
             mb: 4, 
             textAlign: 'center',
-            borderRadius: 3
+            borderRadius: 3,
+            border: '2px solid',
+            borderColor: answerStatus === 'correct' ? 'success.main' : 
+                        answerStatus === 'incorrect' ? 'error.main' : 
+                        'transparent',
+            boxShadow: answerStatus === 'correct' ? '0 0 15px 5px rgba(76, 175, 80, 0.6)' : 
+                      answerStatus === 'incorrect' ? '0 0 15px 5px rgba(244, 67, 54, 0.6)' : 
+                      'none',
+            transition: 'all 0.3s ease'
           }}
         >
-          
           <Typography 
             variant="h4" 
             sx={{ 
               fontFamily: 'monospace',
               letterSpacing: 2,
-              color: 'text.primary'
+              color: answerStatus === 'correct' ? 'success.main' : 
+                    answerStatus === 'incorrect' ? 'error.main' : 
+                    'text.primary',
+              transition: 'color 0.3s ease'
             }}
           >
             {userAnswer || '_'}
@@ -600,39 +608,7 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
           </Button>
         </Box>
 
-        <AnimatePresence>
-          {message && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              style={{
-                position: 'fixed',
-                bottom: '50%',
-                left: '30%',
-                transform: 'translateX(-50%)',
-                zIndex: 1000
-              }}
-            >
-              <Paper 
-                elevation={6} 
-                sx={{ 
-                  p: 2, 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: 1,
-                  borderRadius: 2,
-                  background: message.includes('Correct') ? '#e8f5e9' : '#ffebee'
-                }}
-              >
-                {messageIcon}
-                <Typography variant="h6">
-                  {message}
-                </Typography>
-              </Paper>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Removed the AnimatePresence section that shows the popup */}
       </Paper>
     </Container>
   );
