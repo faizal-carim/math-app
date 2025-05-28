@@ -250,6 +250,94 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
 
   const isFaizalUser = userName && userName.toLowerCase() === "faizal";
 
+  // Stats display component
+  const StatsDisplay = () => (
+    <>
+      <Paper 
+        elevation={2} 
+        sx={{ 
+          p: 1.5, 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 1,
+          borderRadius: 2,
+          background: 'linear-gradient(145deg, #ffffff 0%, #f0f0f0 100%)',
+          border: '2px solid',
+          borderColor: isTimerRunning ? 'primary.main' : 'grey.300',
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: 6
+          }
+        }}
+      >
+        <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+          <CircularProgress
+            variant="determinate"
+            value={(timer % 60) * 1.67}
+            size={24}
+            thickness={0}
+            sx={{ 
+              color: isTimerRunning ? 'primary.main' : 'grey.400',
+              transition: 'color 0.3s ease'
+            }}
+          />
+          <Box
+            sx={{
+              top: 0,
+              left: 0,
+              bottom: 0,
+              right: 0,
+              position: 'absolute',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Typography 
+              variant="body2" 
+              component="div" 
+              sx={{ 
+                fontWeight: 'bold',
+                color: isTimerRunning ? 'primary.main' : 'text.secondary',
+                transition: 'color 0.3s ease',
+                fontSize: '0.875rem'
+              }}
+            >
+              {formatTime(timer)}
+            </Typography>
+          </Box>
+        </Box>
+      </Paper>
+      <Paper 
+        elevation={2} 
+        sx={{ 
+          p: 1.5, 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 1,
+          borderRadius: 2
+        }}
+      >
+        <CoinIcon color="primary" />
+        <Typography variant="h6">{currency}</Typography>
+      </Paper>
+      <Paper 
+        elevation={2} 
+        sx={{ 
+          p: 1.5, 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 1,
+          borderRadius: 2
+        }}
+      >
+        <SkipIcon color="secondary" />
+        <Typography variant="h6">{skipsRemaining}</Typography>
+      </Paper>
+    </>
+  );
+
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       {showConfetti && <Confetti recycle={false} numberOfPieces={200} />}
@@ -323,188 +411,17 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
               gap: 2,
               flexWrap: 'wrap'
             }}>
-              <Paper 
-                elevation={2} 
-                sx={{ 
-                  p: 1.5, 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: 1,
-                  borderRadius: 2,
-                  background: 'linear-gradient(145deg, #ffffff 0%, #f0f0f0 100%)',
-                  border: '2px solid',
-                  borderColor: isTimerRunning ? 'primary.main' : 'grey.300',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: 6
-                  }
-                }}
-              >
-                <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-                  <CircularProgress
-                    variant="determinate"
-                    value={(timer % 60) * 1.67}
-                    size={24}
-                    thickness={4}
-                    sx={{ 
-                      color: isTimerRunning ? 'primary.main' : 'grey.400',
-                      transition: 'color 0.3s ease'
-                    }}
-                  />
-                  <Box
-                    sx={{
-                      top: 0,
-                      left: 0,
-                      bottom: 0,
-                      right: 0,
-                      position: 'absolute',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Typography 
-                      variant="body2" 
-                      component="div" 
-                      sx={{ 
-                        fontWeight: 'bold',
-                        color: isTimerRunning ? 'primary.main' : 'text.secondary',
-                        transition: 'color 0.3s ease',
-                        fontSize: '0.875rem'
-                      }}
-                    >
-                      {formatTime(timer)}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Paper>
-              <Paper 
-                elevation={2} 
-                sx={{ 
-                  p: 1.5, 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: 1,
-                  borderRadius: 2
-                }}
-              >
-                <CoinIcon color="primary" />
-                <Typography variant="h6">{currency}</Typography>
-              </Paper>
-              <Paper 
-                elevation={2} 
-                sx={{ 
-                  p: 1.5, 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: 1,
-                  borderRadius: 2
-                }}
-              >
-                <SkipIcon color="secondary" />
-                <Typography variant="h6">{skipsRemaining}</Typography>
-              </Paper>
+              <StatsDisplay />
             </Box>
           </Box>
           <Box sx={{ 
-            display: 'flex', 
+            display: { xs: 'flex', sm: 'none' },
             gap: 1,
             alignItems: 'center',
             flexShrink: 0
           }}>
-            
-
-            <Paper 
-            elevation={2} 
-              sx={{ 
-              p: 1.5, 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 1,
-              borderRadius: 2
-              }}
-            >
-            <CoinIcon color="primary" />
-            <Typography variant="h6">{currency}</Typography>
-          </Paper>
-          <Paper 
-            elevation={2} 
-              sx={{ 
-              p: 1.5, 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 1,
-              borderRadius: 2
-            }}
-          >
-            <SkipIcon color="secondary" />
-            <Typography variant="h6">{skipsRemaining}</Typography>
-          </Paper>
-          <Paper 
-            elevation={2} 
-            sx={{ 
-              p: 1.5, 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 1,
-              borderRadius: 2,
-              background: 'linear-gradient(145deg, #ffffff 0%, #f0f0f0 100%)',
-              border: '2px solid',
-              borderColor: isTimerRunning ? 'primary.main' : 'grey.300',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-              <CircularProgress
-                variant="determinate"
-                value={(timer % 60) * 1.67}
-                size={24}
-                thickness={0}
-                sx={{ 
-                  color: isTimerRunning ? 'primary.main' : 'grey.400',
-                  transition: 'color 0.3s ease'
-                }}
-              />
-              <Box
-                sx={{
-                  top: 0,
-                  left: 0,
-                  bottom: 0,
-                  right: 0,
-                  position: 'absolute',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Typography 
-                  variant="body2" 
-                  component="div" 
-                  sx={{ 
-                    fontWeight: 'bold',
-                    color: isTimerRunning ? 'primary.main' : 'text.secondary',
-                    transition: 'color 0.3s ease',
-                    fontSize: '0.875rem'
-                  }}
-                >
-                  {formatTime(timer)}
-                </Typography>
-              </Box>
-            </Box>
-          </Paper>
-          
+            <StatsDisplay />
           </Box>
-        </Box>
-
-        {/* Add timer and stats below for mobile view */}
-        <Box sx={{ 
-          display: { xs: 'flex', sm: 'none' },
-          gap: 2,
-          mb: 3,
-          flexWrap: 'wrap'
-        }}>
-          
         </Box>
 
         <motion.div
@@ -607,8 +524,6 @@ export default function GameScreen({ user, onLogout, onNavigate }) {
           >
           </Button>
         </Box>
-
-        {/* Removed the AnimatePresence section that shows the popup */}
       </Paper>
     </Container>
   );
